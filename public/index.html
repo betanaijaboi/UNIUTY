@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- CRITICAL for mobile responsiveness -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <!-- PWA / App-like on mobile -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="UNIUTY Portal">
+  <meta name="theme-color" content="#0A1628">
+
+  <title>UNIUTY University Portal</title>
+  <meta name="description" content="University of Unity — Student, Lecturer, and Administration Portal with Biometric Authentication">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="/css/main.css">
+
+  <!-- Socket.IO (real-time biometric events) -->
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       LOGIN SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <div class="login-brand">UNIUTY</div>
+      <div class="login-sub">University Portal</div>
+
+      <!-- Role Selection -->
+      <div class="login-role-grid" id="roleGrid">
+        <div class="login-role-btn selected" onclick="selectRole(this,'admin')" data-role="admin">
+          <span class="lrb-icon">🛡️</span>
+          <div class="lrb-label">Administrator</div>
+          <div class="lrb-id">ADM-001</div>
+        </div>
+        <div class="login-role-btn" onclick="selectRole(this,'vc')" data-role="vc">
+          <span class="lrb-icon">🎓</span>
+          <div class="lrb-label">Vice Chancellor</div>
+          <div class="lrb-id">VC-001</div>
+        </div>
+        <div class="login-role-btn" onclick="selectRole(this,'lecturer')" data-role="lecturer">
+          <span class="lrb-icon">📚</span>
+          <div class="lrb-label">Lecturer</div>
+          <div class="lrb-id">LEC-0042</div>
+        </div>
+        <div class="login-role-btn" onclick="selectRole(this,'student')" data-role="student">
+          <span class="lrb-icon">👨‍🎓</span>
+          <div class="lrb-label">Student</div>
+          <div class="lrb-id">UNIUTY/2022/0814</div>
+        </div>
+      </div>
+
+      <!-- Credentials -->
+      <div class="form-row">
+        <label class="form-lbl">Portal ID / Username</label>
+        <input type="text" id="loginId" class="form-in"
+               placeholder="e.g. ADM-001"
+               value="ADM-001"
+               autocomplete="username"
+               inputmode="text">
+      </div>
+      <div class="form-row">
+        <label class="form-lbl">Password</label>
+        <input type="password" id="loginPwd" class="form-in"
+               placeholder="Enter your password"
+               value="password123"
+               autocomplete="current-password">
+      </div>
+
+      <!-- Biometric Login Button -->
+      <div class="login-bio-strip" id="bioPad" onclick="triggerBioLogin()" role="button" tabindex="0">
+        <span class="lbs-icon">🖐</span>
+        <div>
+          <div class="lbs-text">Use Biometric Login</div>
+          <div class="lbs-sub">Fingerprint · Retina · Facial Recognition</div>
+        </div>
+      </div>
+
+      <button class="login-btn" onclick="doLogin()">Sign In to Portal</button>
+    </div>
+
+    <div class="login-footer">
+      UNIUTY University Portal &nbsp;·&nbsp; 2024/2025 Academic Session<br>
+      All logins are biometric-verified and audit-logged
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PORTAL SHELL (hidden until logged in)
+  ═══════════════════════════════════════════════ -->
+  <div id="portalShell" style="display:none;flex-direction:row;">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar (built dynamically by JS) -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation"></aside>
+
+    <!-- Main Content Area -->
+    <div class="main">
+
+      <!-- Top Bar -->
+      <div class="topbar" role="banner">
+        <!-- Mobile hamburger -->
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu" aria-expanded="false">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 4h12M2 8h12M2 12h12"/>
+          </svg>
+        </button>
+
+        <div class="topbar-title" id="pgTitle">Dashboard</div>
+
+        <div class="topbar-right">
+          <!-- Biometric status indicator -->
+          <div class="bio-live">
+            <span class="bio-dot"></span>
+            <span class="bio-live-text" id="bioMethodLabel">Biometric Active</span>
+          </div>
+
+          <!-- Notifications -->
+          <button class="notif-btn" aria-label="Notifications">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M8 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5z"/>
+              <path d="M6.5 13.5a1.5 1.5 0 003 0"/>
+            </svg>
+            <div class="pip"></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Page Content (built dynamically by JS) -->
+      <main class="content" id="mainContent" role="main"></main>
+
+    </div><!-- /.main -->
+
+    <!-- Mobile Bottom Navigation (built dynamically) -->
+    <nav class="bottom-nav" id="bottomNav" aria-label="Mobile navigation"></nav>
+
+  </div><!-- /#portalShell -->
+
+  <!-- ═══════════════════════════════════════════════
+       SCRIPTS — load in order
+  ═══════════════════════════════════════════════ -->
+  <!-- Data (demo data, sidebar configs, page titles) -->
+  <script src="/js/data.js"></script>
+
+  <!-- Page renderers (one per portal type) -->
+  <script src="/js/pages-admin.js"></script>
+  <script src="/js/pages-vc.js"></script>
+  <script src="/js/pages-lecturer.js"></script>
+  <script src="/js/pages-student.js"></script>
+
+  <!-- Main app logic (auth, nav, biometric, UI) -->
+  <script src="/js/main.js"></script>
+
+  <!-- Inline: show portal if already logged in -->
+  <script>
+    (function() {
+      const token = localStorage.getItem('uniuty_token');
+      // If token exists, try auto-login on page load
+      if (token) {
+        // main.js will handle token validation
+        console.log('Existing session found — validating...');
+      }
+    })();
+  </script>
+
+</body>
+</html>
