@@ -1,13 +1,13 @@
 # UNIUTY University Portal
 
-A professional, role-based university management portal for the **University of Unity (UNIUTY)**. Built as a responsive web application accessible on PCs and mobile devices, with a fully integrated biometric authentication system.
+A professional, role-based university management portal for the **University of Unity (UNIUTY)**. Built as a fully responsive web application accessible on PCs and mobile devices, with a fully integrated biometric authentication system.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Frontend — No Server Required)
 
 1. Clone the repository
-2. Open `index.html` in any modern browser — no server required
+2. Open `index.html` in any modern browser
 3. Sign in with demo credentials:
 
 | Role | Portal ID | Password |
@@ -23,37 +23,37 @@ A professional, role-based university management portal for the **University of 
 
 ```
 uniuty-portal/
-├── index.html              # Main entry point
+├── index.html                  # Main entry point
 ├── css/
-│   ├── main.css            # UI component styles
-│   └── layout.css          # Login, sidebar, topbar, responsive
-└── js/
-    ├── icons.js            # 60+ professional SVG icons
-    ├── biometric.js        # Hardware plugin API + simulation
-    ├── data.js             # Mock data (replace with API)
-    ├── helpers.js          # Shared render helpers
-    ├── app.js              # Core: login, routing, navigation
-    ├── forgot-password.js  # Role-specific password recovery
-    ├── pages-admin.js      # Administrator portal pages
-    ├── pages-vc.js         # Vice Chancellor pages
-    ├── pages-lecturer.js   # Lecturer pages
-    └── pages-student.js    # Student pages
-docs/
-    ├── index.html          # Documentation hub
-    ├── prd.html            # Product Requirements Document
-    ├── user-stories.html   # 40 User Stories
-    ├── user-flows.html     # User Flow Diagrams
-    ├── erd.html            # Database ERD
-    ├── architecture.html   # System Architecture
-    ├── api-docs.html       # API Documentation
-    ├── wireframes.html     # UI Wireframes
-    ├── design-system.html  # Design System & Style Guide
-    ├── security.html       # Security Requirements
-    ├── acceptance-criteria.html
-    ├── roadmap.html        # Project Roadmap
-    ├── test-plan.html      # Test Plan
-    ├── deployment.html     # Deployment & Maintenance Plan
-    └── UNIUTY_SRS.docx    # Full SRS Word Document
+│   ├── main.css                # UI component styles
+│   └── layout.css              # Login, sidebar, topbar, responsive
+├── js/
+│   ├── icons.js                # 60+ professional SVG icons
+│   ├── biometric.js            # Hardware plugin API + simulation
+│   ├── data.js                 # Mock data (replace with API)
+│   ├── helpers.js              # Shared render helpers
+│   ├── app.js                  # Core: login, routing, navigation
+│   ├── forgot-password.js      # Role-specific password recovery
+│   ├── pages-admin.js          # Administrator portal pages
+│   ├── pages-vc.js             # Vice Chancellor pages
+│   ├── pages-lecturer.js       # Lecturer pages
+│   └── pages-student.js        # Student pages
+└── docs/
+    ├── index.html              # Documentation hub (open this)
+    ├── prd.html                # Product Requirements Document
+    ├── user-stories.html       # 40 User Stories
+    ├── user-flows.html         # User Flow Diagrams
+    ├── erd.html                # Database ERD (14 tables)
+    ├── architecture.html       # System Architecture Diagram
+    ├── api-docs.html           # REST API Documentation
+    ├── wireframes.html         # UI Wireframes (9 screens)
+    ├── design-system.html      # Design System & Style Guide
+    ├── security.html           # Security Requirements
+    ├── acceptance-criteria.html # Acceptance Criteria (Gherkin)
+    ├── roadmap.html            # Project Roadmap (4 phases)
+    ├── test-plan.html          # Test Plan
+    ├── deployment.html         # Deployment & Maintenance Plan
+    └── UNIUTY_SRS.docx         # Full SRS Word Document
 ```
 
 ---
@@ -67,14 +67,14 @@ docs/
 - **Student** — Results, transcript, timetable, fee payment, biometric profile
 
 ### Authentication
-- **Auto role detection** from Portal ID prefix (no role selector needed)
+- **Auto role detection** from Portal ID prefix — no role selector needed
 - **Biometric login** — fingerprint, retina, facial recognition, NFC card
 - **Smart lockout** — 3 failed attempts → 30-second cooldown
-- **Role-specific password recovery** with multi-factor security
+- **Role-specific password recovery** with multi-factor security (Admin requires security question + OTP + biometric)
 
 ### Biometric System
 - Hardware-agnostic **BiometricAPI** plugin interface
-- Built-in simulation mode for development
+- Built-in simulation mode for development (no hardware needed)
 - Plug in real hardware with one call: `BiometricAPI.register('fingerprint', YourPlugin)`
 - Full audit trail for every biometric event
 
@@ -82,7 +82,7 @@ docs/
 - Role-based access control (RBAC)
 - VC → Admin promotion requires **Admin biometric co-authorisation**
 - All actions audit-logged with timestamp, user, method, and IP
-- Password complexity enforcement with strength indicator
+- Password complexity enforcement with live strength indicator
 
 ---
 
@@ -98,7 +98,7 @@ const MyFingerprintPlugin = {
   async delete(userId)  { /* remove template */ },
 };
 
-// Register before portal loads
+// Register before portal loads (index.html script tags)
 BiometricAPI.register('fingerprint', MyFingerprintPlugin);
 ```
 
@@ -117,7 +117,7 @@ Supported methods: `fingerprint` · `retina` · `facial` · `nfc`
 
 ## 📚 Documentation
 
-Full documentation is in the `docs/` folder. Open `docs/index.html` for the hub linking all 15 deliverables including SRS, wireframes, ERD, API spec, test plan, and more.
+Full documentation suite in the `docs/` folder. Open `docs/index.html` for the hub linking all **15 deliverables** including SRS, wireframes, ERD, API specification, test plan, roadmap, and more.
 
 ---
 
