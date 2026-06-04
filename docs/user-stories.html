@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Stories — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">User Stories &amp; Use Cases</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#admin">Admin Stories</a></li>
+        <li><a href="#vc">VC Stories</a></li>
+        <li><a href="#lecturer">Lecturer Stories</a></li>
+        <li><a href="#student">Student Stories</a></li>
+        <li><a href="#biometric">Biometric Stories</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">User Stories &amp; Use Cases</h1>
+      <p class="doc-lead">Structured user stories covering all four portal roles and the biometric subsystem. Each story follows the standard format with acceptance criteria and Gherkin scenarios for key flows.</p>
+
+      <div class="callout callout-info">
+        <strong>Format:</strong> As a [role], I want to [action] so that [benefit]. Acceptance criteria use <code>GIVEN / WHEN / THEN</code> Gherkin notation for testable scenarios.
+      </div>
+
+      <!-- ADMIN STORIES -->
+      <h2 class="doc-h2" id="admin">1. Administrator Stories</h2>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-01</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to create and manage user accounts so that all staff and students have appropriate access to the portal.</p>
+        <ul class="story-ac">
+          <li>Admin can create accounts for students, lecturers, and other admins</li>
+          <li>Each account requires: full name, email, role, department, and staff/matric number</li>
+          <li>System auto-generates a temporary password and sends it via email</li>
+          <li>Admin can suspend, re-activate, or permanently delete accounts</li>
+          <li>Account creation is recorded in the audit log with the admin's ID</li>
+        </ul>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am logged in as an Administrator<br/>
+          <span class="kw">When</span> I navigate to User Management → Create User<br/>
+          <span class="kw">And</span> I fill in name <span class="val">"Dr. Amaka Okafor"</span>, email <span class="val">"a.okafor@uniuty.edu.ng"</span>, role <span class="val">"Lecturer"</span>, department <span class="val">"Computer Science"</span><br/>
+          <span class="kw">And</span> I click <span class="val">"Create Account"</span><br/>
+          <span class="kw">Then</span> a new user record is created in the database<br/>
+          <span class="kw">And</span> a welcome email with temporary credentials is sent to <span class="val">"a.okafor@uniuty.edu.ng"</span><br/>
+          <span class="kw">And</span> the action is recorded in the audit log
+        </div>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-02</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to assign and change user roles so that access privileges can be updated when staff responsibilities change.</p>
+        <ul class="story-ac">
+          <li>Admin can change any user's role from the user detail page</li>
+          <li>Role change requires a mandatory justification note</li>
+          <li>If promoting to Admin or VC role, Vice Chancellor approval is required first</li>
+          <li>The user is notified via email of the role change</li>
+          <li>Previous role history is preserved in the audit log</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-03</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to approve and publish semester results so that students can view their grades after quality control.</p>
+        <ul class="story-ac">
+          <li>Admin sees a list of result batches pending review, grouped by course and semester</li>
+          <li>Admin can view individual scores before approving</li>
+          <li>Admin can flag a batch for correction and return it to the lecturer</li>
+          <li>On approval, results become visible to students immediately</li>
+          <li>Approval action is timestamped and attributed to the admin's account</li>
+        </ul>
+        <div class="gherkin">
+          <span class="kw">Given</span> Lecturer Dr. Okafor has submitted results for <span class="val">CSC 301</span> Second Semester <span class="val">2025/2026</span><br/>
+          <span class="kw">When</span> I open the pending result batch and review all scores<br/>
+          <span class="kw">And</span> I click <span class="val">"Approve &amp; Publish"</span><br/>
+          <span class="kw">Then</span> all student records in the batch are marked <span class="val">published = true</span><br/>
+          <span class="kw">And</span> students enrolled in <span class="val">CSC 301</span> receive a result notification<br/>
+          <span class="kw">And</span> the batch shows status <span class="val">"Published"</span> with my name and timestamp
+        </div>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-04</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to manage department records and course offerings so that the academic catalogue is always accurate.</p>
+        <ul class="story-ac">
+          <li>Admin can add, edit, or archive departments</li>
+          <li>Admin can create courses with code, title, credit units, level, and semester</li>
+          <li>Admin can assign lecturers to courses for a given session and semester</li>
+          <li>Archiving a department disables new enrolments but preserves historical records</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-05</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to configure the academic calendar so that fee deadlines and result submission windows are automatically enforced.</p>
+        <ul class="story-ac">
+          <li>Admin can set semester start/end dates, fee due dates, and result submission deadlines</li>
+          <li>System blocks result submission outside the configured window</li>
+          <li>Automated reminders are sent 7 days and 1 day before deadlines</li>
+          <li>Calendar changes require VC approval if semester is already in progress</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-06</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to view and export the system audit log so that I can conduct security reviews and respond to disputes.</p>
+        <ul class="story-ac">
+          <li>Audit log shows: timestamp, user ID, action type, IP address, biometric verification status</li>
+          <li>Admin can filter by date range, user, action type, and IP address</li>
+          <li>Audit log is exportable as CSV and PDF</li>
+          <li>Audit log entries cannot be deleted by any user including Admin</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-07</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to manage student admission records so that new students can be onboarded efficiently at the start of each session.</p>
+        <ul class="story-ac">
+          <li>Admin can create admission records from JAMB/UTME data import</li>
+          <li>Admin can update admission status: Pending, Offered, Accepted, Rejected</li>
+          <li>Accepted students can be converted to active student accounts in one click</li>
+          <li>Rejected applicants receive an automated email notification</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-08</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to generate financial reconciliation reports so that the bursary can verify all payments against what is owed.</p>
+        <ul class="story-ac">
+          <li>Report shows: total fees billed, total paid, outstanding balance per student, per department, and university-wide</li>
+          <li>Filterable by session, department, payment method, and payment gateway</li>
+          <li>Exportable as Excel and PDF</li>
+          <li>Report refresh is real-time, not batched</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-09</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to lock or unlock student accounts so that I can handle security incidents and reinstate affected students quickly.</p>
+        <ul class="story-ac">
+          <li>Admin can manually lock/unlock any student or staff account</li>
+          <li>Lock reason must be entered and is stored with the action</li>
+          <li>Locked accounts receive an email explaining next steps</li>
+          <li>Unlock requires admin to re-verify the student's identity</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-ADMIN-10</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to monitor biometric enrollment coverage so that I can identify students or staff who have not yet enrolled and take action.</p>
+        <ul class="story-ac">
+          <li>Dashboard shows % of users enrolled per biometric method</li>
+          <li>Admin can export a list of unenrolled users</li>
+          <li>Admin can send a bulk reminder email/SMS to unenrolled users</li>
+          <li>Coverage is broken down by department and role</li>
+        </ul>
+      </div>
+
+      <!-- VC STORIES -->
+      <h2 class="doc-h2" id="vc">2. Vice Chancellor Stories</h2>
+
+      <div class="story">
+        <span class="story-id">US-VC-01</span>
+        <p class="story-text">As a <strong>Vice Chancellor</strong>, I want to view an executive dashboard so that I can monitor the university's academic and financial health at a glance.</p>
+        <ul class="story-ac">
+          <li>Dashboard shows: total active students, average CGPA by department, semester pass rate, total fees collected, attendance averages</li>
+          <li>Charts are interactive: click a department to drill down</li>
+          <li>Data refreshes every 15 minutes</li>
+          <li>Dashboard is accessible on mobile and tablet</li>
+        </ul>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am logged in as Vice Chancellor<br/>
+          <span class="kw">When</span> I navigate to the Executive Dashboard<br/>
+          <span class="kw">Then</span> I see total enrollment <span class="val">12,847</span>, average CGPA <span class="val">3.12</span>, and semester pass rate <span class="val">78.4%</span><br/>
+          <span class="kw">And</span> I can click <span class="val">"Computer Science"</span> to see department-specific metrics
+        </div>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-VC-02</span>
+        <p class="story-text">As a <strong>Vice Chancellor</strong>, I want to approve staff role promotions so that elevated privileges are granted only with executive oversight.</p>
+        <ul class="story-ac">
+          <li>VC receives an in-portal notification and email when a role promotion is pending</li>
+          <li>VC can approve or reject with a comment</li>
+          <li>Approval is biometric-verified before taking effect</li>
+          <li>Both the requesting admin and the affected user are notified of the decision</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-VC-03</span>
+        <p class="story-text">As a <strong>Vice Chancellor</strong>, I want to access the full audit trail for any user or action so that I can investigate anomalies independently.</p>
+        <ul class="story-ac">
+          <li>VC has read-only access to the complete audit log</li>
+          <li>VC can search by any user, action, date range, or IP</li>
+          <li>Log cannot be altered or deleted by VC</li>
+          <li>Sensitive fields (password hashes, bio templates) are never shown in the log</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-VC-04</span>
+        <p class="story-text">As a <strong>Vice Chancellor</strong>, I want to receive a weekly summary report via email so that I stay informed without logging into the portal daily.</p>
+        <ul class="story-ac">
+          <li>Email sent every Monday at 07:00 WAT</li>
+          <li>Report includes: new enrolments, results published this week, payments received, critical security events</li>
+          <li>VC can opt out or change delivery frequency from profile settings</li>
+          <li>Report is also accessible as a PDF download from the portal</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-VC-05</span>
+        <p class="story-text">As a <strong>Vice Chancellor</strong>, I want to view departmental performance comparisons so that I can identify underperforming departments and intervene.</p>
+        <ul class="story-ac">
+          <li>Comparison table shows all 14 departments sorted by pass rate, CGPA, attendance rate</li>
+          <li>VC can toggle between current semester and historical views</li>
+          <li>Departments below a configurable threshold are highlighted in red</li>
+        </ul>
+      </div>
+
+      <!-- LECTURER STORIES -->
+      <h2 class="doc-h2" id="lecturer">3. Lecturer Stories</h2>
+
+      <div class="story">
+        <span class="story-id">US-LEC-01</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to enter student scores for my assigned courses so that results can be processed without paper score sheets.</p>
+        <ul class="story-ac">
+          <li>Lecturer sees only courses they are assigned to for the current session/semester</li>
+          <li>Score entry interface shows the class list with matric numbers and student photos</li>
+          <li>CA score (max 30) and Exam score (max 70) entered per student</li>
+          <li>System auto-calculates total and grade using university grading scale</li>
+          <li>Scores can be saved as draft and submitted later within the window</li>
+          <li>Once submitted, scores are locked pending admin approval</li>
+        </ul>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am assigned to <span class="val">CSC 301</span> for <span class="val">2025/2026 Second Semester</span><br/>
+          <span class="kw">When</span> I open the result entry form for <span class="val">CSC 301</span><br/>
+          <span class="kw">And</span> I enter CA score <span class="val">25</span> and exam score <span class="val">58</span> for student <span class="val">20/CSC/001</span><br/>
+          <span class="kw">Then</span> the system displays total <span class="val">83</span> and grade <span class="val">"A"</span><br/>
+          <span class="kw">And</span> I can submit the batch for admin approval
+        </div>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-02</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to record student attendance via biometric scan so that proxy attendance is eliminated.</p>
+        <ul class="story-ac">
+          <li>Lecturer initiates an attendance session for a specific course and date</li>
+          <li>Students tap NFC card or complete facial scan at the department terminal</li>
+          <li>Attendance is automatically recorded with timestamp and location</li>
+          <li>Lecturer sees a real-time count of present vs. registered students</li>
+          <li>Attendance session can be closed manually or auto-closes after 15 minutes</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-03</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to view my class list with photos so that I can visually identify students during in-person sessions.</p>
+        <ul class="story-ac">
+          <li>Class list shows: matric number, full name, passport photo, level, attendance percentage</li>
+          <li>Lecturer can search and filter by level, name, or attendance status</li>
+          <li>Students below 75% attendance are flagged with a warning icon</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-04</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to edit submitted scores within an approved amendment window so that I can correct genuine errors before final ratification.</p>
+        <ul class="story-ac">
+          <li>Amendment window is configurable by admin (default: 48 hours after submission)</li>
+          <li>Each edit is logged with before/after values and reason</li>
+          <li>After the window closes, edits require admin intervention</li>
+          <li>Students are not notified of score edits until admin approves and publishes</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-05</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to export my class attendance report as PDF so that I have a document ready for Senate board submissions.</p>
+        <ul class="story-ac">
+          <li>Report includes: student list, per-session attendance, total sessions, percentage for each student</li>
+          <li>Report is stamped with course code, semester, and lecturer name</li>
+          <li>PDF is downloadable and email-deliverable</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-06</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to verify student identity via biometric at exam entry so that impersonation is immediately detected and prevented.</p>
+        <ul class="story-ac">
+          <li>Lecturer activates "Exam Check-in" mode for a course</li>
+          <li>Student presents biometric (fingerprint, retina, or facial)</li>
+          <li>System returns: VERIFIED / FAILED with student photo and name</li>
+          <li>Failed verifications are logged and flagged for admin review</li>
+          <li>Each check-in event is recorded in biometric_log</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-07</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to receive notifications when my result submissions are approved or returned for correction so that I can respond quickly.</p>
+        <ul class="story-ac">
+          <li>Email and in-portal notification on approval or rejection</li>
+          <li>Rejection notification includes admin's correction notes</li>
+          <li>Correction deadline is included in the notification</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-08</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to see a summary of each student's performance across all my courses so that I can identify at-risk students early.</p>
+        <ul class="story-ac">
+          <li>Summary shows CGPA, current semester average, attendance rate, and payment status (cleared/not cleared)</li>
+          <li>At-risk students (CGPA below 1.5 or attendance below 50%) are highlighted</li>
+          <li>Lecturer can flag a student for pastoral support referral</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-09</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to view the results submission deadline for each course so that I never miss the window.</p>
+        <ul class="story-ac">
+          <li>Deadline is visible on the results entry page with a countdown timer</li>
+          <li>Reminder email sent 3 days before the deadline for any course with unsaved scores</li>
+          <li>After the deadline, the form is disabled and shows a message to contact admin</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-LEC-10</span>
+        <p class="story-text">As a <strong>Lecturer</strong>, I want to upload supplementary score sheets as a CSV file so that I can use my existing spreadsheet workflow and minimise re-entry.</p>
+        <ul class="story-ac">
+          <li>CSV template is downloadable from the result entry page</li>
+          <li>System validates: matric numbers match enrolled students, scores are within range</li>
+          <li>Validation errors are listed row by row before import is accepted</li>
+          <li>Successful upload pre-fills the form for final review before submission</li>
+        </ul>
+      </div>
+
+      <!-- STUDENT STORIES -->
+      <h2 class="doc-h2" id="student">4. Student Stories</h2>
+
+      <div class="story">
+        <span class="story-id">US-STU-01</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to view my semester results as soon as they are published so that I know my academic standing without visiting the registry.</p>
+        <ul class="story-ac">
+          <li>Results page shows all courses for the selected semester: course code, title, CA, exam, total, grade, and units</li>
+          <li>CGPA is calculated and displayed for the current and cumulative levels</li>
+          <li>Results are accessible immediately after admin publishes them</li>
+          <li>Student receives an email and in-portal notification when results are published</li>
+        </ul>
+        <div class="gherkin">
+          <span class="kw">Given</span> Admin has published results for <span class="val">2025/2026 Second Semester</span><br/>
+          <span class="kw">When</span> I log in and navigate to <span class="val">My Results</span><br/>
+          <span class="kw">Then</span> I see all my course results with grades and my CGPA of <span class="val">3.54</span><br/>
+          <span class="kw">And</span> a <span class="val">"Download Transcript"</span> button is available
+        </div>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-02</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to download an official result transcript as a PDF so that I have a document for job applications and postgraduate admissions.</p>
+        <ul class="story-ac">
+          <li>Transcript PDF includes: university letterhead, student bio, all semesters, CGPAs, and a verification QR code</li>
+          <li>QR code links to a verification page on the UNIUTY domain</li>
+          <li>Download is only available for students with no outstanding fees (cleared)</li>
+          <li>Each download is logged in the audit trail</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-03</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to pay my school fees online so that I don't have to visit the bank or join bursary queues.</p>
+        <ul class="story-ac">
+          <li>Fee payment page shows: total fee, amount paid, outstanding balance, due date</li>
+          <li>Student can choose Remita or Flutterwave as payment gateway</li>
+          <li>On successful payment, portal balance updates in real time</li>
+          <li>Payment receipt is automatically generated as PDF</li>
+          <li>Student receives email confirmation with transaction reference</li>
+        </ul>
+        <div class="gherkin">
+          <span class="kw">Given</span> I have an outstanding fee balance of <span class="val">₦250,000</span><br/>
+          <span class="kw">When</span> I click <span class="val">"Pay Now"</span> and select <span class="val">Remita</span><br/>
+          <span class="kw">And</span> I complete payment on the Remita gateway<br/>
+          <span class="kw">Then</span> my portal balance updates to <span class="val">₦0</span> outstanding<br/>
+          <span class="kw">And</span> I receive a PDF receipt to my email
+        </div>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-04</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to check my attendance status for each course so that I can monitor my standing and avoid disqualification from exams.</p>
+        <ul class="story-ac">
+          <li>Attendance page shows per-course: sessions held, sessions attended, percentage</li>
+          <li>Courses below 75% are highlighted with a red warning</li>
+          <li>Breakdown of each attendance session (date, method, verified/not) is available</li>
+          <li>Student cannot modify attendance records</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-05</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to update my profile information so that my contact details are always current.</p>
+        <ul class="story-ac">
+          <li>Student can update: phone number, alternate email, home address, next-of-kin</li>
+          <li>Name, matric number, department, and level are read-only (admin-managed)</li>
+          <li>Profile photo can be uploaded (max 2MB, JPEG/PNG)</li>
+          <li>Updates are saved immediately and reflected across the portal</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-06</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to view my course registration for the current semester so that I can confirm my enrolled courses are correct.</p>
+        <ul class="story-ac">
+          <li>Course registration page shows: course code, title, units, day/time, venue, assigned lecturer</li>
+          <li>Total registered credit units displayed and compared against maximum allowed</li>
+          <li>Any discrepancy can be flagged to admin via a built-in query form</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-07</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to receive notifications for important events so that I never miss deadlines or announcements.</p>
+        <ul class="story-ac">
+          <li>Notifications delivered via in-portal bell icon and email</li>
+          <li>Event types: result published, payment due, attendance warning, account locked</li>
+          <li>Student can configure which notification types they receive</li>
+          <li>Unread notifications are badged in the nav</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-08</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to reset my password via email so that I can regain access without visiting the ICT office.</p>
+        <ul class="story-ac">
+          <li>Reset link sent to registered email within 60 seconds of request</li>
+          <li>Reset link expires after 15 minutes and is single-use</li>
+          <li>New password must meet complexity requirements: 8+ chars, 1 uppercase, 1 number, 1 special char</li>
+          <li>Password change invalidates all existing sessions</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-09</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to view my full academic history across all semesters so that I can track my progress toward graduation.</p>
+        <ul class="story-ac">
+          <li>Academic history shows all semesters from year 1, sorted chronologically</li>
+          <li>Each semester shows: courses, grades, semester GPA, credit units, and cumulative CGPA</li>
+          <li>Expected graduation year is calculated and displayed based on current level</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-STU-10</span>
+        <p class="story-text">As a <strong>Student</strong>, I want to view my biometric enrollment status so that I know which methods I have registered and can book an enrollment session if needed.</p>
+        <ul class="story-ac">
+          <li>Profile page shows status for each biometric method: Fingerprint, Retina, Facial, NFC</li>
+          <li>Enrolled methods show enrollment date; unenrolled show a "Book Enrollment" button</li>
+          <li>Booking links to a departmental enrollment calendar</li>
+        </ul>
+      </div>
+
+      <!-- BIOMETRIC STORIES -->
+      <h2 class="doc-h2" id="biometric">5. Biometric System Stories</h2>
+
+      <div class="story">
+        <span class="story-id">US-BIO-01</span>
+        <p class="story-text">As a <strong>System Administrator</strong>, I want the biometric hardware to communicate with the portal via a standardised plugin API so that different hardware vendors can be supported without code changes.</p>
+        <ul class="story-ac">
+          <li>BiometricAPI exposes a standard interface: enroll(), verify(), delete(), getLog()</li>
+          <li>Hardware driver registered as a plugin module at server startup</li>
+          <li>If plugin fails to initialise, system falls back to PIN-based verification with an alert to admin</li>
+          <li>API version is negotiated at handshake; backward-compatible for 2 major versions</li>
+        </ul>
+        <div class="gherkin">
+          <span class="kw">Given</span> a Suprema BioStation biometric device is connected and driver loaded<br/>
+          <span class="kw">When</span> the portal starts and calls <span class="val">BiometricAPI.init()</span><br/>
+          <span class="kw">Then</span> the device handshake succeeds within <span class="val">5 seconds</span><br/>
+          <span class="kw">And</span> the audit log records <span class="val">"Biometric device online — Suprema BioStation v2.3"</span>
+        </div>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-BIO-02</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to enroll a student's biometric templates so that they can be verified during exams and attendance.</p>
+        <ul class="story-ac">
+          <li>Enrollment captures 3 samples per method and creates a combined template</li>
+          <li>Template quality score must be ≥ 70% for enrollment to succeed</li>
+          <li>Template is stored encrypted (AES-256) and never transmitted in plaintext</li>
+          <li>Enrollment logged in biometric_log with method, quality score, and admin ID</li>
+          <li>Student must present valid ID card during enrollment session</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-BIO-03</span>
+        <p class="story-text">As a <strong>System</strong>, I want to verify a user's biometric in under 3 seconds so that queues do not form at exam and attendance checkpoints.</p>
+        <ul class="story-ac">
+          <li>1:1 verification (template match against known user) completes in &lt; 1.5s</li>
+          <li>1:N identification (unknown vs. full database) completes in &lt; 3s for up to 15,000 records</li>
+          <li>If verification exceeds 5s, the system returns a timeout error and logs the event</li>
+          <li>Response includes: match result, confidence score, user ID (if matched)</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-BIO-04</span>
+        <p class="story-text">As an <strong>Administrator</strong>, I want to delete a user's biometric templates when their account is closed so that their biometric data is not retained.</p>
+        <ul class="story-ac">
+          <li>Template deletion is triggered automatically on account deactivation</li>
+          <li>Admin can also manually trigger deletion from the user profile</li>
+          <li>Deletion is irreversible; user must re-enroll if account is reactivated</li>
+          <li>Deletion event logged in biometric_log and audit_log</li>
+          <li>NDPR Article 17 (right to erasure) is satisfied by this process</li>
+        </ul>
+      </div>
+
+      <div class="story">
+        <span class="story-id">US-BIO-05</span>
+        <p class="story-text">As a <strong>System</strong>, I want to log every biometric event with full metadata so that security audits can trace any verification attempt.</p>
+        <ul class="story-ac">
+          <li>Log captures: user_id, method, purpose, location, result, quality_score, template_hash, timestamp</li>
+          <li>Failed verification events are flagged and trigger an alert if 3 failures occur for same user within 5 minutes</li>
+          <li>Log is append-only; no entry can be modified or deleted</li>
+          <li>Log is accessible to Admin and VC; not visible to Lecturers or Students</li>
+        </ul>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

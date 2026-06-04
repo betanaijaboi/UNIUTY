@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRD — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">Product Requirements Document</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#problem">Problem Statement</a></li>
+        <li><a href="#users">Target Users</a></li>
+        <li><a href="#goals-users">User Goals</a></li>
+        <li><a href="#goals-business">Business Goals</a></li>
+        <li><a href="#metrics">Success Metrics</a></li>
+        <li><a href="#features">Feature Prioritization</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">Product Requirements Document</h1>
+      <p class="doc-lead">Formal requirements specification for the UNIUTY University Portal — a role-based, biometric-secured academic management system serving students, lecturers, and administrators across all 14 departments.</p>
+
+      <div class="callout callout-info">
+        <strong>Document Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Status:</strong> <span class="pill pill-ok">Approved</span> &nbsp;|&nbsp; <strong>Last Updated:</strong> June 2026
+      </div>
+
+      <!-- PROBLEM STATEMENT -->
+      <h2 class="doc-h2" id="problem">1. Problem Statement</h2>
+      <p>UNIUTY currently relies on fragmented, largely paper-based systems to manage the full student lifecycle — from admission through graduation. This creates compounding inefficiencies across every academic function:</p>
+
+      <h3 class="doc-h3">1.1 Core Pain Points</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Domain</th><th>Current State</th><th>Impact</th><th>Severity</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Result Management</td>
+              <td>Lecturers submit paper score sheets; registry staff manually transcribe into spreadsheets</td>
+              <td>6–10 week result processing cycle; transcription errors averaging 3.2% per batch</td>
+              <td><span class="pill pill-danger">Critical</span></td>
+            </tr>
+            <tr>
+              <td>Identity Verification</td>
+              <td>Student ID cards are the sole verification method; cards are easily forged or borrowed</td>
+              <td>Estimated 8–12 exam impersonation cases per semester go undetected</td>
+              <td><span class="pill pill-danger">Critical</span></td>
+            </tr>
+            <tr>
+              <td>Attendance Tracking</td>
+              <td>Paper sign-in sheets; no real-time visibility; easy to forge proxy signatures</td>
+              <td>Attendance data unreliable; cannot enforce 75% attendance policy fairly</td>
+              <td><span class="pill pill-warn">High</span></td>
+            </tr>
+            <tr>
+              <td>Fee Payment</td>
+              <td>Bank teller slips presented to bursary; manual reconciliation weekly</td>
+              <td>Delays in clearance; ghost payments; 2–4 week reconciliation lag</td>
+              <td><span class="pill pill-warn">High</span></td>
+            </tr>
+            <tr>
+              <td>Data Fragmentation</td>
+              <td>Student data spread across registry, bursary, departments, and hostel systems with no sync</td>
+              <td>Duplicate records; contradictory data; re-entry errors; no single source of truth</td>
+              <td><span class="pill pill-warn">High</span></td>
+            </tr>
+            <tr>
+              <td>Reporting &amp; Oversight</td>
+              <td>Vice Chancellor's office relies on manually compiled Excel reports from each department</td>
+              <td>Reports are stale by the time they arrive; no drill-down capability</td>
+              <td><span class="pill pill-med">Medium</span></td>
+            </tr>
+            <tr>
+              <td>Admission Management</td>
+              <td>Admission decisions communicated via notice boards and physical letters</td>
+              <td>Qualified candidates miss deadlines; fraud in admission lists</td>
+              <td><span class="pill pill-med">Medium</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">1.2 Problem Scope</h3>
+      <p>The proposed UNIUTY Portal addresses all seven pain points above through a unified, web-based platform with hardware biometric integration. The system does <strong>not</strong> seek to replace the university's existing accounting (SAGE) or library (Koha) systems in this phase; integration hooks will be provided via REST API.</p>
+
+      <!-- TARGET USERS -->
+      <h2 class="doc-h2" id="users">2. Target Users</h2>
+      <p>UNIUTY has a combined user base of <strong>13,481 principals</strong> across four role categories:</p>
+
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Role</th><th>Count</th><th>Primary Device</th><th>Technical Literacy</th><th>Access Frequency</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Students</strong></td>
+              <td>12,847</td>
+              <td>Mobile browser (Android), shared PC labs</td>
+              <td>Medium — comfortable with social media; limited with enterprise software</td>
+              <td>Daily during semester; weekly off-semester</td>
+            </tr>
+            <tr>
+              <td><strong>Lecturers</strong></td>
+              <td>512</td>
+              <td>Departmental PCs, personal laptops</td>
+              <td>Mixed — ranges from advanced to basic</td>
+              <td>Weekly; intensive at semester end</td>
+            </tr>
+            <tr>
+              <td><strong>Administrators</strong></td>
+              <td>118</td>
+              <td>Office desktop PCs with biometric hardware</td>
+              <td>Medium — trained on legacy SAGE system</td>
+              <td>Daily</td>
+            </tr>
+            <tr>
+              <td><strong>Vice Chancellor</strong></td>
+              <td>4 (VC + deputies)</td>
+              <td>iPad Pro, MacBook, Desktop</td>
+              <td>High — executive suite with IT support</td>
+              <td>Weekly reports; on-demand</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">2.1 Departmental Coverage</h3>
+      <p>The portal serves all <strong>14 academic departments</strong> across 4 faculties:</p>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Faculty</th><th>Departments</th><th>Student Count</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Science &amp; Technology</td><td>Computer Science, Electrical Engineering, Mechanical Engineering, Civil Engineering</td><td>3,842</td></tr>
+            <tr><td>Business &amp; Management</td><td>Accounting, Business Administration, Economics, Banking &amp; Finance</td><td>4,210</td></tr>
+            <tr><td>Arts &amp; Social Sciences</td><td>English, Sociology, Political Science, Mass Communication</td><td>2,895</td></tr>
+            <tr><td>Health Sciences</td><td>Nursing, Medical Laboratory Science</td><td>1,900</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- USER GOALS -->
+      <h2 class="doc-h2" id="goals-users">3. User Goals</h2>
+
+      <h3 class="doc-h3">3.1 Student Goals</h3>
+      <ul>
+        <li>View semester results immediately after publication without visiting the registry</li>
+        <li>Download official result transcripts and fee receipts as PDFs at any time</li>
+        <li>Check attendance status per course in real time to avoid disqualification</li>
+        <li>Pay fees online without visiting the bank or bursary queue</li>
+        <li>Receive instant notifications when results are published or fees are due</li>
+        <li>Access the portal from any device without installing a native app</li>
+      </ul>
+
+      <h3 class="doc-h3">3.2 Lecturer Goals</h3>
+      <ul>
+        <li>Submit continuous assessment and exam scores directly from a spreadsheet-like interface</li>
+        <li>Verify student identity via biometric before allowing exam entry</li>
+        <li>Record attendance quickly via NFC tap or facial scan — no paper sheets</li>
+        <li>See a live class list with photos to identify students</li>
+        <li>Edit submitted scores within an approved window before final ratification</li>
+        <li>Generate attendance reports for Senate board meetings</li>
+      </ul>
+
+      <h3 class="doc-h3">3.3 Administrator Goals</h3>
+      <ul>
+        <li>Manage the full user lifecycle: onboard, assign roles, suspend, and deactivate accounts</li>
+        <li>Approve and ratify result batches submitted by lecturers before they go live to students</li>
+        <li>Manage departmental data: courses, staff assignments, timetables</li>
+        <li>Generate financial reconciliation reports comparing payments vs. fees owed</li>
+        <li>Monitor biometric enrollment coverage to ensure full compliance</li>
+        <li>Configure system-wide settings: academic calendar, fee schedules, grace periods</li>
+      </ul>
+
+      <h3 class="doc-h3">3.4 Vice Chancellor Goals</h3>
+      <ul>
+        <li>Access a real-time executive dashboard with university-wide KPIs</li>
+        <li>Drill down into departmental performance, pass rates, and attendance trends</li>
+        <li>Review and approve promotion of staff to administrator-level roles</li>
+        <li>Access audit logs for compliance and governance reporting</li>
+        <li>Receive automated weekly digest reports via email</li>
+      </ul>
+
+      <!-- BUSINESS GOALS -->
+      <h2 class="doc-h2" id="goals-business">4. Business Goals</h2>
+
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>#</th><th>Business Goal</th><th>Quantified Target</th><th>Timeline</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BG-01</td>
+              <td>Reduce result processing time from submission to publication</td>
+              <td>From ~8 weeks to ≤ 5 business days (80% reduction)</td>
+              <td>Phase 1 launch</td>
+            </tr>
+            <tr>
+              <td>BG-02</td>
+              <td>Eliminate examination impersonation fraud via biometric verification</td>
+              <td>0 confirmed impersonation incidents per semester</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>BG-03</td>
+              <td>Achieve platform uptime SLA</td>
+              <td>≥ 99.9% uptime (max 8.7h downtime/year)</td>
+              <td>Phase 3 launch</td>
+            </tr>
+            <tr>
+              <td>BG-04</td>
+              <td>Digitise fee collection and reduce reconciliation lag</td>
+              <td>Real-time reconciliation; 0 ghost payments</td>
+              <td>Phase 2</td>
+            </tr>
+            <tr>
+              <td>BG-05</td>
+              <td>Achieve full biometric enrollment of all registered students and staff</td>
+              <td>≥ 95% enrollment within 3 months of go-live</td>
+              <td>Phase 3</td>
+            </tr>
+            <tr>
+              <td>BG-06</td>
+              <td>Establish a single source of truth for student academic records</td>
+              <td>Zero duplicate active student records; 100% data migration from legacy</td>
+              <td>Phase 3</td>
+            </tr>
+            <tr>
+              <td>BG-07</td>
+              <td>Comply with NDPR (Nigeria Data Protection Regulation)</td>
+              <td>Full NDPR audit pass; DPO appointed; breach procedures in place</td>
+              <td>Phase 3</td>
+            </tr>
+            <tr>
+              <td>BG-08</td>
+              <td>Enable future multi-campus expansion without re-architecture</td>
+              <td>Modular tenant-aware data model from day one</td>
+              <td>Phase 4</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SUCCESS METRICS -->
+      <h2 class="doc-h2" id="metrics">5. Success Metrics</h2>
+
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>KPI</th><th>Baseline (Pre-Portal)</th><th>Target (End of Year 1)</th><th>Measurement Method</th><th>Owner</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Result publication cycle time</td>
+              <td>~8 weeks</td>
+              <td>≤ 5 business days</td>
+              <td>Timestamp: result_submitted → published in DB</td>
+              <td>Registrar</td>
+            </tr>
+            <tr>
+              <td>Biometric enrollment rate</td>
+              <td>0%</td>
+              <td>≥ 95% of active users</td>
+              <td>biometric_log records per user / total active users</td>
+              <td>ICT Director</td>
+            </tr>
+            <tr>
+              <td>Confirmed exam impersonation incidents</td>
+              <td>8–12 per semester (estimated)</td>
+              <td>0 per semester</td>
+              <td>Security incident reports post-audit</td>
+              <td>Dean of Students</td>
+            </tr>
+            <tr>
+              <td>Student portal login adoption</td>
+              <td>N/A</td>
+              <td>≥ 90% of enrolled students log in at least once per month</td>
+              <td>audit_log login events per matric number</td>
+              <td>ICT Director</td>
+            </tr>
+            <tr>
+              <td>Fee payment digital rate</td>
+              <td>~5% (bank app)</td>
+              <td>≥ 70% via portal</td>
+              <td>payments.method = 'online' / total payments</td>
+              <td>Bursary</td>
+            </tr>
+            <tr>
+              <td>System uptime</td>
+              <td>N/A</td>
+              <td>≥ 99.9%</td>
+              <td>UptimeRobot 30-day rolling average</td>
+              <td>DevOps</td>
+            </tr>
+            <tr>
+              <td>Average page load time</td>
+              <td>N/A</td>
+              <td>&lt; 2 seconds (P95)</td>
+              <td>New Relic APM P95 response time</td>
+              <td>Dev Team</td>
+            </tr>
+            <tr>
+              <td>Biometric scan verification time</td>
+              <td>N/A</td>
+              <td>&lt; 3 seconds per scan</td>
+              <td>BiometricAPI response time logged in biometric_log</td>
+              <td>Dev Team</td>
+            </tr>
+            <tr>
+              <td>Support tickets related to data errors</td>
+              <td>~120/semester (transcription errors)</td>
+              <td>&lt; 10/semester</td>
+              <td>Helpdesk ticket category analysis</td>
+              <td>Registry</td>
+            </tr>
+            <tr>
+              <td>NDPR audit compliance score</td>
+              <td>0% (no formal assessment)</td>
+              <td>≥ 90% on formal NDPR audit checklist</td>
+              <td>External auditor assessment</td>
+              <td>Legal / DPO</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FEATURE PRIORITIZATION -->
+      <h2 class="doc-h2" id="features">6. Feature Prioritization (MoSCoW)</h2>
+
+      <p>Features are categorised using the MoSCoW method: <span class="pill pill-must">Must Have</span> <span class="pill pill-should">Should Have</span> <span class="pill pill-could">Could Have</span> <span class="pill pill-ok">Won't Have (Now)</span></p>
+
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>ID</th><th>Feature</th><th>Category</th><th>Priority</th><th>Rationale</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>F-01</td>
+              <td>Role-based authentication (Admin, VC, Lecturer, Student)</td>
+              <td>Auth</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Foundation for all other features; without this nothing else is secure</td>
+            </tr>
+            <tr>
+              <td>F-02</td>
+              <td>Biometric enrollment (fingerprint, retina, facial, NFC)</td>
+              <td>Biometric</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Core differentiator; fraud elimination objective depends on this</td>
+            </tr>
+            <tr>
+              <td>F-03</td>
+              <td>Biometric identity verification at exam entry</td>
+              <td>Biometric</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Directly addresses exam impersonation BG-02</td>
+            </tr>
+            <tr>
+              <td>F-04</td>
+              <td>Lecturer result submission portal (CA + Exam scores)</td>
+              <td>Results</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Primary academic function; 80% time reduction BG-01</td>
+            </tr>
+            <tr>
+              <td>F-05</td>
+              <td>Admin result approval and ratification workflow</td>
+              <td>Results</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Governance requirement; results cannot be published without approval</td>
+            </tr>
+            <tr>
+              <td>F-06</td>
+              <td>Student result viewing dashboard</td>
+              <td>Results</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Primary student-facing value proposition</td>
+            </tr>
+            <tr>
+              <td>F-07</td>
+              <td>Result transcript PDF download</td>
+              <td>Results</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Replaces manual registry visits; high student demand</td>
+            </tr>
+            <tr>
+              <td>F-08</td>
+              <td>Online fee payment (Remita / Flutterwave)</td>
+              <td>Fees</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>BG-04 digitise fee collection; major friction reducer</td>
+            </tr>
+            <tr>
+              <td>F-09</td>
+              <td>Fee balance and payment history dashboard</td>
+              <td>Fees</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Students and bursary need real-time balance visibility</td>
+            </tr>
+            <tr>
+              <td>F-10</td>
+              <td>Biometric attendance recording (NFC + facial scan)</td>
+              <td>Attendance</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Replaces paper sign-in; proxy attendance eliminated</td>
+            </tr>
+            <tr>
+              <td>F-11</td>
+              <td>Student attendance status dashboard per course</td>
+              <td>Attendance</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Enables enforcement of 75% attendance policy</td>
+            </tr>
+            <tr>
+              <td>F-12</td>
+              <td>Admin user management (CRUD + role assignment)</td>
+              <td>Admin</td>
+              <td><span class="pill pill-must">Must</span></td>
+              <td>Operational prerequisite for managing 13,000+ users</td>
+            </tr>
+            <tr>
+              <td>F-13</td>
+              <td>VC executive dashboard (KPIs, pass rates, financials)</td>
+              <td>Analytics</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>BG-06 oversight; high visibility with governance; needed for Senate reporting</td>
+            </tr>
+            <tr>
+              <td>F-14</td>
+              <td>Audit log viewer (Admin + VC)</td>
+              <td>Security</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Compliance requirement; NDPR Article 26 obligation</td>
+            </tr>
+            <tr>
+              <td>F-15</td>
+              <td>Student admission management module</td>
+              <td>Admissions</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Eliminates manual notice board communications; high impact</td>
+            </tr>
+            <tr>
+              <td>F-16</td>
+              <td>Departmental course and timetable management</td>
+              <td>Admin</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Needed for course-result linkage integrity</td>
+            </tr>
+            <tr>
+              <td>F-17</td>
+              <td>Email and SMS notifications (results, fees, attendance alerts)</td>
+              <td>Communication</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Drives adoption; proactive communication reduces support load</td>
+            </tr>
+            <tr>
+              <td>F-18</td>
+              <td>Account lockout and brute force protection</td>
+              <td>Security</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Security baseline; NDPR compliance</td>
+            </tr>
+            <tr>
+              <td>F-19</td>
+              <td>Password reset via email OTP</td>
+              <td>Auth</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Reduces helpdesk load for password resets</td>
+            </tr>
+            <tr>
+              <td>F-20</td>
+              <td>BiometricAPI plugin SDK for hardware vendors</td>
+              <td>Biometric</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Enables hardware vendor flexibility without re-architecture</td>
+            </tr>
+            <tr>
+              <td>F-21</td>
+              <td>Bulk student data import (CSV/Excel migration)</td>
+              <td>Migration</td>
+              <td><span class="pill pill-should">Should</span></td>
+              <td>Critical for legacy data migration at go-live</td>
+            </tr>
+            <tr>
+              <td>F-22</td>
+              <td>Automated weekly VC digest report (email)</td>
+              <td>Analytics</td>
+              <td><span class="pill pill-could">Could</span></td>
+              <td>Nice-to-have for executives; manual export available as alternative</td>
+            </tr>
+            <tr>
+              <td>F-23</td>
+              <td>Student financial clearance certificate generation</td>
+              <td>Fees</td>
+              <td><span class="pill pill-could">Could</span></td>
+              <td>Automates bursary clearance; medium impact, low effort</td>
+            </tr>
+            <tr>
+              <td>F-24</td>
+              <td>Native iOS and Android mobile applications</td>
+              <td>Platform</td>
+              <td><span class="pill pill-ok">Won't (Now)</span></td>
+              <td>PWA approach covers mobile in Phase 1–3; native apps deferred to Phase 4</td>
+            </tr>
+            <tr>
+              <td>F-25</td>
+              <td>AI-based fraud detection on results and biometric logs</td>
+              <td>AI/ML</td>
+              <td><span class="pill pill-ok">Won't (Now)</span></td>
+              <td>Requires 2+ semesters of data baseline; planned for Phase 4</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

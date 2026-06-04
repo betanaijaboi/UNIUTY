@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIUTY Portal — Wireframes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0A1628; --gold:#C9A84C; --gold-pale:#F7F1E3; --cream:#FAFAF7;
+  --slate:#3D4F6B; --muted:#8A95A3; --border:#E2E4E8;
+  --success:#1A7F5A; --danger:#B33A3A; --info:#1A5F9E; --warn:#8a6a1a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f0f0f0;color:var(--navy)}
+
+/* DOC SHELL */
+.doc-header{background:var(--navy);padding:28px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:1000}
+.doc-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold)}
+.doc-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;letter-spacing:1px;text-transform:uppercase}
+.toc{display:flex;gap:6px;flex-wrap:wrap}
+.toc a{font-size:11px;color:rgba(255,255,255,0.5);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:20px;transition:all 0.15s;white-space:nowrap}
+.toc a:hover,.toc a.active{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:600}
+
+/* SECTION */
+.section{padding:48px 40px 32px;max-width:1200px;margin:0 auto}
+.sec-label{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:6px}
+.sec-title{font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);margin-bottom:4px}
+.sec-desc{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.wire-divider{height:1px;background:var(--border);margin:48px 0}
+
+/* FRAME GRID */
+.frame-row{display:grid;gap:24px;margin-bottom:32px}
+.frame-row.cols-2{grid-template-columns:1fr 1fr}
+.frame-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.frame-row.cols-1{grid-template-columns:1fr;max-width:540px}
+.frame-row.cols-1-wide{grid-template-columns:1fr;max-width:900px}
+
+/* DEVICE FRAME */
+.device{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.12);border:1px solid var(--border)}
+.device-label{background:var(--cream);border-bottom:1px solid var(--border);padding:8px 14px;font-size:10px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;letter-spacing:0.5px}
+.device-label strong{color:var(--navy);font-size:11px}
+.device-chip{font-size:9px;background:var(--navy);color:var(--gold);padding:2px 7px;border-radius:10px;font-weight:600}
+
+/* WIREFRAME STYLES */
+.wf{padding:0}
+.wf-login-bg{background:var(--navy);padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:0}
+.wf-login-box{background:#fff;border-radius:16px;padding:24px 22px;width:100%;max-width:320px;box-shadow:0 12px 40px rgba(0,0,0,0.3)}
+.wf-brand{font-family:'Playfair Display',serif;color:var(--gold);font-size:22px;text-align:center;font-weight:600}
+.wf-sub{font-size:9px;color:var(--muted);text-align:center;letter-spacing:2px;text-transform:uppercase;margin-top:2px;margin-bottom:12px}
+.wf-divider{height:1px;background:var(--border);margin:10px 0}
+.wf-field{margin-bottom:8px}
+.wf-field label{font-size:9px;color:var(--muted);display:block;margin-bottom:3px}
+.wf-input{width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--navy);background:#fff}
+.wf-bio-strip{background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin:8px 0;cursor:pointer}
+.wf-btn{width:100%;background:var(--navy);color:var(--gold);border:none;border-radius:8px;padding:10px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center}
+.wf-role-chip{background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.wf-chip-ico{width:26px;height:26px;background:rgba(201,168,76,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wf-forgot{text-align:right;margin:-4px 0 8px;font-size:9px;color:var(--info);cursor:pointer;text-decoration:underline}
+
+/* PORTAL SHELL WIREFRAME */
+.wf-shell{display:flex;height:340px}
+.wf-sidebar{width:120px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.wf-sb-top{padding:10px 8px;border-bottom:1px solid rgba(201,168,76,0.2)}
+.wf-sb-brand{font-family:'Playfair Display',serif;font-size:11px;color:var(--gold)}
+.wf-sb-sub{font-size:7px;color:rgba(201,168,76,0.5);letter-spacing:1px;text-transform:uppercase}
+.wf-sb-profile{margin:6px 6px;padding:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:6px}
+.wf-sb-avi{width:22px;height:22px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:8px;color:var(--navy);margin-bottom:4px}
+.wf-sb-name{font-size:8px;color:#fff;font-weight:500}
+.wf-sb-meta{font-size:7px;color:rgba(255,255,255,0.4)}
+.wf-nav-lbl{font-size:7px;color:rgba(255,255,255,0.25);letter-spacing:1px;text-transform:uppercase;padding:6px 8px 2px}
+.wf-nav-item{display:flex;align-items:center;gap:5px;padding:5px 8px;color:rgba(255,255,255,0.45);font-size:8px;cursor:pointer;border-left:2px solid transparent}
+.wf-nav-item.active{color:var(--gold);background:rgba(201,168,76,0.08);border-left-color:var(--gold)}
+.wf-nav-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);flex-shrink:0}
+.wf-nav-dot.gold{background:var(--gold)}
+.wf-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.wf-topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 12px;height:30px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.wf-topbar-title{font-size:9px;font-weight:500;color:var(--navy)}
+.wf-bio-live{font-size:8px;color:var(--success);background:#ebf5ec;border:1px solid rgba(26,127,90,0.2);border-radius:4px;padding:2px 6px;display:flex;align-items:center;gap:3px}
+.wf-bio-dot{width:4px;height:4px;border-radius:50%;background:#3dba7d}
+.wf-content{flex:1;overflow:hidden;padding:10px;background:var(--cream)}
+
+/* CONTENT COMPONENTS */
+.wf-pg-title{font-family:'Playfair Display',serif;font-size:13px;color:var(--navy);margin-bottom:2px}
+.wf-pg-sub{font-size:8px;color:var(--muted);margin-bottom:8px}
+.wf-kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.wf-kcard{background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px 8px}
+.wf-kcard-lbl{font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
+.wf-kcard-val{font-size:14px;font-weight:500;color:var(--navy);font-family:'Playfair Display',serif}
+.wf-kcard-sub{font-size:7px;color:var(--success)}
+.wf-alert{display:flex;align-items:center;gap:5px;padding:6px 8px;border-radius:5px;margin-bottom:5px;font-size:8px}
+.wf-alert.ok{background:#ebf5ec;border:1px solid rgba(26,127,90,0.2);color:#0e5e3b}
+.wf-alert.warn{background:#fff5e0;border:1px solid rgba(201,168,76,0.3);color:#8a6a1a}
+.wf-alert.danger{background:#FCEAEA;border:1px solid rgba(179,58,58,0.2);color:#791f1f}
+.wf-alert-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.wf-panel{background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px;margin-bottom:6px}
+.wf-panel-title{font-size:8px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.wf-table-hdr{display:grid;gap:4px;background:var(--cream);padding:4px 6px;border-radius:4px;margin-bottom:2px}
+.wf-table-row{display:grid;gap:4px;padding:4px 6px;border-bottom:1px solid rgba(226,228,232,0.4)}
+.wf-cell{font-size:7px;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wf-cell.hdr{font-size:7px;color:var(--muted);text-transform:uppercase}
+.wf-pill{display:inline-block;padding:1px 5px;border-radius:6px;font-size:7px;font-weight:500}
+.pill-ok{background:#EBF5EC;color:#0e5e3b}
+.pill-b{background:#E6F0FB;color:#0c447c}
+.pill-w{background:#FFF5E0;color:#8a6a1a}
+.pill-d{background:#FCEAEA;color:#791f1f}
+
+/* BIO CARDS */
+.wf-bio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px}
+.wf-bio-card{border:1px solid var(--border);border-radius:6px;padding:8px 4px;text-align:center;cursor:pointer}
+.wf-bio-card:hover{border-color:var(--gold);background:var(--gold-pale)}
+.wf-bio-card.done{border-color:var(--success);background:#ebf5ec}
+.wf-bio-ico{width:22px;height:22px;border-radius:5px;background:var(--cream);margin:0 auto 4px;display:flex;align-items:center;justify-content:center}
+.wf-bio-nm{font-size:7px;font-weight:600;color:var(--navy)}
+.wf-bio-st{font-size:7px;color:var(--muted);margin-top:1px}
+.wf-bio-st.ok{color:var(--success)}
+
+/* FORGOT PASSWORD WIREFRAME */
+.wf-modal-bg{background:rgba(10,22,40,0.8);padding:20px;display:flex;align-items:center;justify-content:center}
+.wf-modal{background:#fff;border-radius:12px;padding:18px;width:100%;max-width:300px}
+.wf-modal-title{font-family:'Playfair Display',serif;font-size:14px;color:var(--navy);margin-bottom:2px}
+.wf-modal-sub{font-size:9px;color:var(--muted);margin-bottom:12px}
+.wf-policy{background:var(--cream);border-radius:6px;padding:8px;font-size:8px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+
+/* TWO-COL LAYOUT */
+.wf-two-col{display:grid;grid-template-columns:1fr 120px;gap:6px}
+.wf-rc{display:flex;flex-direction:column;gap:6px}
+
+/* MOBILE WIREFRAME */
+.wf-mobile{max-width:240px;margin:0 auto}
+.wf-mobile-topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 10px;height:28px;display:flex;align-items:center;justify-content:space-between}
+.wf-hamburger{display:flex;flex-direction:column;gap:2px;cursor:pointer}
+.wf-hamburger span{width:12px;height:1.5px;background:var(--navy);display:block;border-radius:1px}
+
+/* ANNOTATIONS */
+.annotation{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:20px;padding:3px 10px;margin:3px 3px}
+.annotation-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.annotations{display:flex;flex-wrap:wrap;margin-bottom:16px;padding:10px;background:#fff;border-radius:8px;border:1px solid var(--border)}
+.annotations-title{font-size:10px;font-weight:600;color:var(--navy);margin-bottom:8px;width:100%}
+
+/* FLOW DIAGRAM */
+.flow{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding:20px 0}
+.flow-step{display:flex;flex-direction:column;align-items:center;min-width:120px}
+.flow-box{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;font-size:11px;font-weight:500;color:var(--navy);min-width:110px}
+.flow-box.start{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.flow-box.decision{background:var(--gold-pale);border-color:var(--gold);color:var(--warn)}
+.flow-box.end{background:#EBF5EC;border-color:var(--success);color:#0e5e3b}
+.flow-box.error{background:#FCEAEA;border-color:var(--danger);color:#791f1f}
+.flow-label{font-size:9px;color:var(--muted);margin-top:5px;text-align:center;max-width:110px}
+.flow-arrow{display:flex;align-items:center;padding:0 4px;color:var(--muted);font-size:18px;margin-top:-2px;flex-shrink:0;padding-top:22px}
+.flow-arrow-down{text-align:center;color:var(--muted);font-size:14px;margin:4px 0}
+
+@media(max-width:900px){
+  .frame-row.cols-2,.frame-row.cols-3{grid-template-columns:1fr}
+  .section{padding:32px 20px 24px}
+  .doc-header{padding:20px}
+  .toc{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- DOC HEADER -->
+<div class="doc-header">
+  <div>
+    <div class="doc-title">UNIUTY University Portal — Wireframes</div>
+    <div class="doc-sub">UI Design Reference · Version 1.0 · June 2026</div>
+  </div>
+  <nav class="toc">
+    <a href="#login" onclick="setActive(this)">Login</a>
+    <a href="#role-detect" onclick="setActive(this)">Role Detection</a>
+    <a href="#forgot-pwd" onclick="setActive(this)">Forgot Password</a>
+    <a href="#admin-dash" onclick="setActive(this)">Admin Dashboard</a>
+    <a href="#biometric" onclick="setActive(this)">Biometric Auth</a>
+    <a href="#vc-dash" onclick="setActive(this)">VC Dashboard</a>
+    <a href="#lecturer" onclick="setActive(this)">Lecturer</a>
+    <a href="#student" onclick="setActive(this)">Student</a>
+    <a href="#mobile" onclick="setActive(this)">Mobile</a>
+    <a href="#auth-flow" onclick="setActive(this)">Auth Flow</a>
+  </nav>
+</div>
+
+<!-- ═══════════════ WF-01: LOGIN ═══════════════ -->
+<div class="section" id="login">
+  <div class="sec-label">WF-01</div>
+  <div class="sec-title">Login Screen</div>
+  <div class="sec-desc">Clean sign-in form without role selector. The system auto-detects the user's role from their Portal ID prefix. Biometric login strip provides an alternative to password entry. "Forgot password?" link triggers role-specific recovery.</div>
+
+  <div class="frame-row cols-2">
+    <!-- Empty state -->
+    <div class="device">
+      <div class="device-label"><strong>Login — Empty State</strong><span class="device-chip">Desktop · 1280×800</span></div>
+      <div class="wf wf-login-bg" style="min-height:360px;justify-content:center">
+        <div class="wf-login-box">
+          <div class="wf-brand">UNIUTY</div>
+          <div class="wf-sub">University Portal</div>
+          <div class="wf-divider"></div>
+          <div class="wf-field">
+            <label>Portal ID / Username</label>
+            <input class="wf-input" placeholder="ADM-001 · VC-001 · LEC-xxxx · UNIUTY/yyyy/nnnn" readonly>
+          </div>
+          <div class="wf-field">
+            <label>Password</label>
+            <input class="wf-input" type="password" placeholder="Enter your password" readonly>
+          </div>
+          <div class="wf-forgot">Forgot password?</div>
+          <div class="wf-bio-strip">
+            <div style="width:26px;height:26px;background:rgba(201,168,76,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#8a6a1a" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5a6.5 6.5 0 016.5 6.5"/><path d="M1.5 8A6.5 6.5 0 018 1.5"/><path d="M8 5a3 3 0 013 3c0 2-.8 3.5-2 4.5"/><path d="M5 8a3 3 0 001.5 2.6"/><path d="M8 5v3.5"/></svg>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--warn);font-weight:500">Use Biometric Login</div>
+              <div style="font-size:8px;color:var(--muted)">Fingerprint · Retina · Facial · NFC</div>
+            </div>
+          </div>
+          <div class="wf-btn">Sign In to Portal</div>
+          <div style="text-align:center;font-size:8px;color:var(--muted);margin-top:10px">All logins are biometric-verified and audit-logged</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div class="device">
+      <div class="device-label"><strong>Login — Error State (3 attempts)</strong><span class="device-chip">Desktop · 1280×800</span></div>
+      <div class="wf wf-login-bg" style="min-height:360px;justify-content:center">
+        <div class="wf-login-box">
+          <div class="wf-brand">UNIUTY</div>
+          <div class="wf-sub">University Portal</div>
+          <div class="wf-divider"></div>
+          <div style="background:#FCEAEA;border:1px solid rgba(179,58,58,0.25);border-radius:7px;padding:8px 10px;margin-bottom:10px;font-size:9px;color:#791f1f">
+            ⚠ Incorrect password. Account locked for 30 seconds after 3 failed attempts. Use "Forgot password?" to recover.
+          </div>
+          <div class="wf-field">
+            <label>Portal ID / Username</label>
+            <input class="wf-input" value="ADM-001" readonly style="border-color:var(--danger)">
+          </div>
+          <div class="wf-field">
+            <label>Password</label>
+            <input class="wf-input" type="password" value="••••••••" readonly style="border-color:var(--danger)">
+          </div>
+          <div class="wf-forgot">Forgot password?</div>
+          <div class="wf-bio-strip">
+            <div style="width:26px;height:26px;background:rgba(201,168,76,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#8a6a1a" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5a6.5 6.5 0 016.5 6.5"/><path d="M8 5a3 3 0 013 3c0 2-.8 3.5-2 4.5"/><path d="M8 5v3.5"/></svg>
+            </div>
+            <div><div style="font-size:10px;color:var(--warn);font-weight:500">Use Biometric Login</div><div style="font-size:8px;color:var(--muted)">Fingerprint · Retina · Facial · NFC</div></div>
+          </div>
+          <div class="wf-btn" style="opacity:0.4;cursor:not-allowed">Sign In to Portal (Locked — 27s)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotations-title">Annotations</div>
+    <span class="annotation"><span class="annotation-dot" style="background:#1A5F9E"></span>No role selector — role detected from Portal ID prefix automatically</span>
+    <span class="annotation"><span class="annotation-dot" style="background:#C9A84C"></span>Biometric strip shows fingerprint icon + method labels</span>
+    <span class="annotation"><span class="annotation-dot" style="background:#B33A3A"></span>3 failed attempts → 30-second lockout with countdown</span>
+    <span class="annotation"><span class="annotation-dot" style="background:#1A7F5A"></span>"Forgot password?" opens role-specific recovery modal</span>
+  </div>
+</div>
+
+<div class="wire-divider"></div>
+
+<!-- ═══════════════ WF-02: ROLE DETECTION ═══════════════ -->
+<div class="section" id="role-detect">
+  <div class="sec-label">WF-02</div>
+  <div class="sec-title">Auto Role Detection</div>
+  <div class="sec-desc">As the user types their Portal ID, the system parses the prefix and displays a role confirmation chip above the input field with the appropriate icon and role name. The chip shows a green tick once a known account is matched.</div>
+
+  <div class="frame-row cols-3">
+    <!-- Admin detected -->
+    <div class="device">
+      <div class="device-label"><strong>Administrator Detected</strong><span class="device-chip">ADM-001</span></div>
+      <div class="wf" style="padding:16px;background:var(--navy)">
+        <div class="wf-login-box">
+          <div class="wf-brand">UNIUTY</div>
+          <div class="wf-sub">University Portal</div>
+          <div class="wf-divider"></div>
+          <div class="wf-role-chip">
+            <div class="wf-chip-ico">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5L2 4.5v5C2 13 4.8 15.5 8 16.5c3.2-1 6-3.5 6-7v-5L8 1.5z"/><path d="M5.5 8.5l2 2 3-3.5"/></svg>
+            </div>
+            <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--navy)">Administrator</div><div style="font-size:8px;color:var(--muted)">System Administrator Portal</div></div>
+            <div style="color:var(--success)"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3.5-3"/></svg></div>
+          </div>
+          <div class="wf-field"><label>Portal ID / Username</label><input class="wf-input" value="ADM-001" readonly style="border-color:var(--gold)"></div>
+          <div class="wf-field"><label>Password</label><input class="wf-input" type="password" placeholder="Enter your password" readonly></div>
+          <div class="wf-forgot">Forgot password?</div>
+          <div class="wf-btn">Sign In to Portal</div>
+        </div>
+      </div>
+    </div>
+    <!-- Lecturer detected -->
+    <div class="device">
+      <div class="device-label"><strong>Lecturer Detected</strong><span class="device-chip">LEC-0042</span></div>
+      <div class="wf" style="padding:16px;background:var(--navy)">
+        <div class="wf-login-box">
+          <div class="wf-brand">UNIUTY</div>
+          <div class="wf-sub">University Portal</div>
+          <div class="wf-divider"></div>
+          <div class="wf-role-chip">
+            <div class="wf-chip-ico">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="10" height="9" rx="1.5"/><path d="M1 5h14M6 5V3h4v2"/><path d="M6 10h4M6 12.5h2"/></svg>
+            </div>
+            <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--navy)">Lecturer</div><div style="font-size:8px;color:var(--muted)">Faculty Portal</div></div>
+            <div style="color:var(--success)"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3.5-3"/></svg></div>
+          </div>
+          <div class="wf-field"><label>Portal ID / Username</label><input class="wf-input" value="LEC-0042" readonly style="border-color:var(--gold)"></div>
+          <div class="wf-field"><label>Password</label><input class="wf-input" type="password" placeholder="Enter your password" readonly></div>
+          <div class="wf-forgot">Forgot password?</div>
+          <div class="wf-btn">Sign In to Portal</div>
+        </div>
+      </div>
+    </div>
+    <!-- Student detected -->
+    <div class="device">
+      <div class="device-label"><strong>Student Detected</strong><span class="device-chip">UNIUTY/2022/0814</span></div>
+      <div class="wf" style="padding:16px;background:var(--navy)">
+        <div class="wf-login-box">
+          <div class="wf-brand">UNIUTY</div>
+          <div class="wf-sub">University Portal</div>
+          <div class="wf-divider"></div>
+          <div class="wf-role-chip">
+            <div class="wf-chip-ico">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"><path d="M3 8.5L8 6l5 2.5-5 2.5L3 8.5z"/><path d="M5.5 9.5v2.5c0 1.1 1.1 2 2.5 2s2.5-.9 2.5-2V9.5"/></svg>
+            </div>
+            <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--navy)">Student</div><div style="font-size:8px;color:var(--muted)">Student Portal</div></div>
+            <div style="color:var(--success)"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3.5-3"/></svg></div>
+          </div>
+          <div class="wf-field"><label>Portal ID / Username</label><input class="wf-input" value="UNIUTY/2022/0814" readonly style="border-color:var(--gold)"></div>
+          <div class="wf-field"><label>Password</label><input class="wf-input" type="password" placeholder="Enter your password" readonly></div>
+          <div class="wf-forgot">Forgot password?</div>
+          <div class="wf-btn">Sign In to Portal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wire-divider"></div>
+
+<!-- ═══════════════ WF-03: FORGOT PASSWORD ═══════════════ -->
+<div class="section" id="forgot-pwd">
+  <div class="sec-label">WF-03</div>
+  <div class="sec-title">Forgot Password — Recovery Flow</div>
+  <div class="sec-desc">Role-specific password recovery with 3 steps: (1) Identity & security verification, (2) OTP + biometric (Admin only), (3) Success confirmation. The policy notice adapts to the detected role.</div>
+
+  <div class="frame-row cols-3">
+    <!-- Step 1 Admin -->
+    <div class="device">
+      <div class="device-label"><strong>Step 1 — Admin Recovery</strong><span class="device-chip">Highest Security</span></div>
+      <div class="wf-modal-bg" style="min-height:340px">
+        <div class="wf-modal">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+            <div><div class="wf-modal-title">Password Recovery</div><div class="wf-modal-sub">Administrator Account Recovery</div></div>
+            <span style="font-size:16px;color:var(--muted);cursor:pointer">×</span>
+          </div>
+          <div class="wf-policy">⚠ Admin recovery requires: (1) security question, (2) email OTP, and (3) biometric re-verification. All actions are permanently audit-logged.</div>
+          <div class="wf-field"><label style="font-size:9px;color:var(--muted)">Portal ID</label><input class="wf-input" value="ADM-001" readonly></div>
+          <div class="wf-field"><label style="font-size:9px;color:var(--muted)">Registered Email</label><input class="wf-input" placeholder="institutional email" readonly></div>
+          <div style="background:#fff5e0;border:1px solid rgba(201,168,76,0.3);border-radius:6px;padding:7px;margin-bottom:8px;font-size:8px;color:var(--warn)"><strong>Security Officer co-authorisation required.</strong></div>
+          <div class="wf-field"><label style="font-size:9px;color:var(--muted)">Security Question</label><select class="wf-input" style="font-size:9px"><option>Select security question…</option></select></div>
+          <div class="wf-field"><label style="font-size:9px;color:var(--muted)">Answer</label><input class="wf-input" placeholder="Your answer" readonly></div>
+          <div class="wf-btn" style="font-size:10px;padding:8px">Send Recovery Code</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 OTP + Bio -->
+    <div class="device">
+      <div class="device-label"><strong>Step 2 — OTP + Biometric (Admin)</strong><span class="device-chip">Scan Required</span></div>
+      <div class="wf-modal-bg" style="min-height:340px">
+        <div class="wf-modal">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+            <div><div class="wf-modal-title">Password Recovery</div><div class="wf-modal-sub">OTP sent to a***@uniuty.edu.ng</div></div>
+            <span style="font-size:16px;color:var(--muted);cursor:pointer">×</span>
+          </div>
+          <div class="wf-field"><label style="font-size:9px;color:var(--muted)">6-digit OTP Code</label><input class="wf-input" value="● ● ● ● ● ●" readonly style="letter-spacing:6px;text-align:center;font-size:14px;font-weight:600"></div>
+          <div style="background:#fff5e0;border:1px solid rgba(201,168,76,0.3);border-radius:6px;padding:7px;margin:6px 0;font-size:8px;color:var(--warn)"><strong>Admin final step:</strong> Biometric re-verification required.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+            <div class="wf-bio-card">
+              <div class="wf-bio-ico"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5a6.5 6.5 0 016.5 6.5"/><path d="M8 5a3 3 0 013 3c0 2-.8 3.5-2 4.5"/><path d="M8 5v3.5"/></svg></div>
+              <div class="wf-bio-nm">Fingerprint</div><div class="wf-bio-st">Tap to scan</div>
+            </div>
+            <div class="wf-bio-card done">
+              <div class="wf-bio-ico" style="background:rgba(26,127,90,0.1)"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--success)" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="3.5"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg></div>
+              <div class="wf-bio-nm">Retina</div><div class="wf-bio-st ok">✓ Verified</div>
+            </div>
+          </div>
+          <div class="wf-field"><label style="font-size:9px;color:var(--muted)">New Password</label><input class="wf-input" type="password" placeholder="Min 8 chars, 1 uppercase, 1 number, 1 symbol" readonly></div>
+          <div style="height:4px;background:var(--border);border-radius:2px;margin:-3px 0 6px;overflow:hidden"><div style="height:100%;width:80%;background:var(--success);border-radius:2px"></div></div>
+          <div class="wf-btn" style="font-size:10px;padding:8px">Reset Password</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 Success -->
+    <div class="device">
+      <div class="device-label"><strong>Step 3 — Success</strong><span class="device-chip">All Roles</span></div>
+      <div class="wf-modal-bg" style="min-height:340px;align-items:center">
+        <div class="wf-modal" style="text-align:center;padding:28px 22px">
+          <div style="width:52px;height:52px;background:#EBF5EC;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:var(--success)">
+            <svg width="26" height="26" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3.5-3"/></svg>
+          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--navy);margin-bottom:6px">Password Reset Successful</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:20px;line-height:1.6">Your new password has been set. This session has been logged and audited. The Security Officer has been notified.</div>
+          <div class="wf-btn">Return to Sign In</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wire-divider"></div>
+
+<!-- ═══════════════ WF-04: ADMIN DASHBOARD ═══════════════ -->
+<div class="section" id="admin-dash">
+  <div class="sec-label">WF-04</div>
+  <div class="sec-title">Administrator Dashboard</div>
+  <div class="sec-desc">Full portal shell with navy sidebar, topbar with biometric status, and content area. Four KPI cards, alert banners, activity feed, and pending action panels.</div>
+
+  <div class="frame-row cols-1-wide">
+    <div class="device">
+      <div class="device-label"><strong>Admin Portal — Dashboard</strong><span class="device-chip">Desktop · Full Portal Shell</span></div>
+      <div class="wf">
+        <div class="wf-shell">
+          <!-- Sidebar -->
+          <div class="wf-sidebar">
+            <div class="wf-sb-top"><div class="wf-sb-brand">UNIUTY</div><div class="wf-sb-sub">University Portal</div></div>
+            <div class="wf-sb-profile"><div class="wf-sb-avi">AD</div><div class="wf-sb-name">Dr. A. Dankwa</div><div class="wf-sb-meta">ADM-001 · Admin</div></div>
+            <div class="wf-nav-lbl">Overview</div>
+            <div class="wf-nav-item active"><div class="wf-nav-dot gold"></div>Dashboard</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Exam Results</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Biometric Auth</div>
+            <div class="wf-nav-lbl">Management</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Students</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Faculty</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Courses</div>
+            <div class="wf-nav-lbl">Administration</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Admissions</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Reports</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Settings</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>Audit Logs</div>
+            <div class="wf-nav-item"><div class="wf-nav-dot"></div>User Management</div>
+          </div>
+          <!-- Main -->
+          <div class="wf-main">
+            <div class="wf-topbar">
+              <div class="wf-topbar-title">Dashboard</div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <div class="wf-bio-live"><div class="wf-bio-dot"></div>Fingerprint verified · 8:41 AM</div>
+                <div style="width:18px;height:18px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative">
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" stroke-width="1.5"><path d="M8 2a5 5 0 015 5v3l1 2H2l1-2V7a5 5 0 015-5z"/></svg>
+                  <div style="width:4px;height:4px;background:var(--danger);border-radius:50%;position:absolute;top:2px;right:2px"></div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-content">
+              <div class="wf-pg-title">Dashboard</div>
+              <div class="wf-pg-sub">System overview — 2024/2025 Academic Session</div>
+              <div class="wf-kgrid">
+                <div class="wf-kcard"><div class="wf-kcard-lbl">Total Students</div><div class="wf-kcard-val">12,847</div><div class="wf-kcard-sub">+847 this session</div></div>
+                <div class="wf-kcard"><div class="wf-kcard-lbl">Academic Staff</div><div class="wf-kcard-val">634</div><div class="wf-kcard-sub">+12 new</div></div>
+                <div class="wf-kcard"><div class="wf-kcard-lbl">Results Posted</div><div class="wf-kcard-val">94%</div><div class="wf-kcard-sub" style="color:var(--warn)">47 pending</div></div>
+                <div class="wf-kcard"><div class="wf-kcard-lbl">Bio Verifications</div><div class="wf-kcard-val">8,419</div><div class="wf-kcard-sub" style="color:var(--muted)">Today</div></div>
+              </div>
+              <div class="wf-alert ok"><div class="wf-alert-dot"></div>All biometric modules online — fingerprint, retina, facial recognition active</div>
+              <div class="wf-alert warn"><div class="wf-alert-dot"></div>3 departments pending result submission — deadline April 18</div>
+              <div class="wf-two-col">
+                <div class="wf-panel">
+                  <div class="wf-panel-title">Recent System Activity</div>
+                  <div style="display:grid;grid-template-columns:60px 1fr;gap:4px">
+                    <div style="font-size:7px;color:var(--muted)">08:41:22</div><div style="font-size:7px">Login — Emeka Obi (fingerprint)</div>
+                    <div style="font-size:7px;color:var(--muted)">08:40:15</div><div style="font-size:7px">Result Posted — Dr. O. Nwosu (CSC 301)</div>
+                    <div style="font-size:7px;color:var(--muted)">08:30:00</div><div style="font-size:7px">Login — Prof. A. Chukwu (retina)</div>
+                    <div style="font-size:7px;color:var(--muted);color:var(--danger)">08:15:30</div><div style="font-size:7px;color:var(--danger)">Bio Failure — Unknown · Exam Hall C</div>
+                  </div>
+                </div>
+                <div class="wf-rc">
+                  <div class="wf-panel"><div class="wf-panel-title">Pending Actions</div>
+                    <div style="background:#fff5e0;border-radius:4px;padding:4px 6px;font-size:7px;color:var(--warn);display:flex;justify-content:space-between;margin-bottom:3px"><span>Result submissions</span><strong>47</strong></div>
+                    <div style="background:#fceaea;border-radius:4px;padding:4px 6px;font-size:7px;color:#791f1f;display:flex;justify-content:space-between;margin-bottom:3px"><span>Bio enrollments</span><strong>234</strong></div>
+                    <div style="background:#e6f0fb;border-radius:4px;padding:4px 6px;font-size:7px;color:#0c447c;display:flex;justify-content:space-between"><span>Fee waivers</span><strong>18</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wire-divider"></div>
+
+<!-- ═══════════════ WF-05: BIOMETRIC AUTH ═══════════════ -->
+<div class="section" id="biometric">
+  <div class="sec-label">WF-05</div>
+  <div class="sec-title">Biometric Authentication Page</div>
+  <div class="sec-desc">Four scan method cards (Fingerprint, Retina, Facial, NFC). Cards transition through idle → scanning (pulse animation) → done/failed states. Hardware plugin status panel shows connected/simulation mode per device.</div>
+
+  <div class="frame-row cols-2">
+    <div class="device">
+      <div class="device-label"><strong>Biometric Cards — Idle &amp; States</strong><span class="device-chip">Admin View</span></div>
+      <div class="wf" style="padding:14px">
+        <div class="wf-pg-title">Biometric Authentication</div>
+        <div class="wf-pg-sub">System-wide biometric management and live monitoring</div>
+        <div class="wf-bio-grid">
+          <div class="wf-bio-card">
+            <div class="wf-bio-ico"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5a6.5 6.5 0 016.5 6.5"/><path d="M8 5a3 3 0 013 3c0 2-.8 3.5-2 4.5"/><path d="M8 5v3.5"/></svg></div>
+            <div class="wf-bio-nm">Fingerprint</div><div class="wf-bio-st">Tap to scan</div>
+          </div>
+          <div class="wf-bio-card" style="border-color:var(--gold);background:var(--gold-pale);animation:none">
+            <div class="wf-bio-ico" style="background:rgba(201,168,76,0.15)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--warn)" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><circle cx="8" cy="8" r="3.5"/></svg></div>
+            <div class="wf-bio-nm">Retina</div><div class="wf-bio-st" style="color:var(--warn)">Scanning…</div>
+          </div>
+          <div class="wf-bio-card done">
+            <div class="wf-bio-ico" style="background:rgba(26,127,90,0.1)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--success)" stroke-width="1.5"><path d="M3 4V3h1M13 3h1v1M4 13H3v-1M13 13v1h-1"/><circle cx="8" cy="8" r="3"/></svg></div>
+            <div class="wf-bio-nm">Facial Scan</div><div class="wf-bio-st ok">✓ Verified</div>
+          </div>
+          <div class="wf-bio-card" style="border-color:var(--danger);background:#fceaea">
+            <div class="wf-bio-ico" style="background:rgba(179,58,58,0.08)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--danger)" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2.5"/></svg></div>
+            <div class="wf-bio-nm">NFC Card</div><div class="wf-bio-st" style="color:var(--danger)">✗ Failed</div>
+          </div>
+        </div>
+        <div style="padding:8px;background:#EBF5EC;border-radius:6px;font-size:8px;color:#0e5e3b;display:flex;align-items:center;gap:5px;margin-top:6px">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5.5 8l2 2 3.5-3"/></svg>
+          Facial Scan verified — Dr. A. Dankwa · ADM-001
+        </div>
+      </div>
+    </div>
+
+    <div class="device">
+      <div class="device-label"><strong>Hardware Plugin Status Panel</strong><span class="device-chip">Admin Only</span></div>
+      <div class="wf" style="padding:14px">
+        <div class="wf-panel" style="background:var(--navy);border-color:rgba(201,168,76,0.2)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-size:9px;color:var(--gold);font-weight:600">Hardware Plugin Status</div>
+            <div style="font-size:8px;color:rgba(255,255,255,0.4)">BiometricAPI v1.0</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            {['Fingerprint','Retina','Facial Scan','NFC Card'].map((n,i)=>`
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:7px;padding:10px 8px;text-align:center">
+              <div style="color:var(--gold);margin-bottom:5px;display:flex;justify-content:center">icon</div>
+              <div style="font-size:9px;font-weight:500;color:#fff">${n}</div>
+              <div style="font-size:8px;margin-top:3px;color:#3dba7d">● Simulation mode</div>
+              <div style="font-size:8px;color:rgba(201,168,76,0.7);margin-top:4px;padding:2px 6px;border:1px solid rgba(201,168,76,0.25);border-radius:10px;cursor:pointer">Connect Plugin</div>
+            </div>`).join('')}
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          {['Fingerprint','Facial','NFC Card','Retina'].map(m=>`
+          <div style="padding:6px 8px;background:#fff;border:1px solid var(--border);border-radius:6px">
+            <div style="font-size:7px;color:var(--muted)">${m}</div>
+            <div style="font-size:9px;font-weight:500">...</div>
+            <div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden"><div style="height:100%;background:var(--gold);border-radius:2px;width:50%"></div></div>
+          </div>`).join('')}
+        </div>
+        <!-- Use static version instead of JS template -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+          <div style="padding:6px 8px;background:#fff;border:1px solid var(--border);border-radius:6px"><div style="font-size:7px;color:var(--muted)">Fingerprint</div><div style="font-size:9px;font-weight:500">4,201 (50%)</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden"><div style="height:100%;background:var(--gold);border-radius:2px;width:50%"></div></div></div>
+          <div style="padding:6px 8px;background:#fff;border:1px solid var(--border);border-radius:6px"><div style="font-size:7px;color:var(--muted)">Facial</div><div style="font-size:9px;font-weight:500">2,948 (35%)</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden"><div style="height:100%;background:#1A5F9E;border-radius:2px;width:35%"></div></div></div>
+          <div style="padding:6px 8px;background:#fff;border:1px solid var(--border);border-radius:6px"><div style="font-size:7px;color:var(--muted)">NFC Card</div><div style="font-size:9px;font-weight:500">1,018 (12%)</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden"><div style="height:100%;background:var(--success);border-radius:2px;width:12%"></div></div></div>
+          <div style="padding:6px 8px;background:#fff;border:1px solid var(--border);border-radius:6px"><div style="font-size:7px;color:var(--muted)">Retina</div><div style="font-size:9px;font-weight:500">252 (3%)</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden"><div style="height:100%;background:var(--danger);border-radius:2px;width:3%"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wire-divider"></div>
+
+<!-- ═══════════════ WF-06: LECTURER POST RESULTS ═══════════════ -->
+<div class="section" id="lecturer">
+  <div class="sec-label">WF-06 &amp; WF-07</div>
+  <div class="sec-title">Lecturer — Post Results &amp; Student Dashboard</div>
+  <div class="sec-desc">Lecturer result submission with biometric identity strip, score entry table with live grade calculation, and submission status panel. Student dashboard with CGPA ring, recent results, and timetable.</div>
+
+  <div class="frame-row cols-2">
+    <div class="device">
+      <div class="device-label"><strong>Lecturer — Post Exam Results</strong><span class="device-chip">Biometric Required</span></div>
+      <div class="wf" style="padding:12px">
+        <div class="wf-pg-title" style="font-size:11px">Post Exam Results</div>
+        <div class="wf-pg-sub">Enter scores, verify identity, then submit</div>
+        <div style="background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:32px;height:32px;background:rgba(201,168,76,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--warn)"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5a6.5 6.5 0 016.5 6.5"/><path d="M8 5a3 3 0 013 3c0 2-.8 3.5-2 4.5"/><path d="M8 5v3.5"/></svg></div>
+          <div style="flex:1"><div style="font-size:9px;font-weight:600;color:var(--navy)">Biometric verification required</div><div style="font-size:8px;color:var(--warn)">Authenticate before submitting</div></div>
+          <div style="background:var(--navy);color:var(--gold);font-size:8px;padding:4px 8px;border-radius:5px;cursor:pointer">Verify Identity</div>
+        </div>
+        <!-- Table -->
+        <div style="overflow:hidden">
+          <div class="wf-table-hdr" style="grid-template-columns:2.5fr 1.5fr 0.8fr 0.8fr 0.6fr 0.6fr 0.6fr">
+            <div class="wf-cell hdr">Matric No.</div><div class="wf-cell hdr">Name</div><div class="wf-cell hdr">CA/40</div><div class="wf-cell hdr">Exam/60</div><div class="wf-cell hdr">Total</div><div class="wf-cell hdr">Grade</div><div class="wf-cell hdr">Save</div>
+          </div>
+          {[['UNIUTY/2021/0011','Amara O.',36,51,'87','A'],['UNIUTY/2021/0045','Tunde A.',30,43,'73','B'],['UNIUTY/2022/0102','Ngozi E.',38,53,'91','A']].map(r=>`
+          <div class="wf-table-row" style="grid-template-columns:2.5fr 1.5fr 0.8fr 0.8fr 0.6fr 0.6fr 0.6fr">
+          </div>`).join('')}
+          <!-- Static rows -->
+          <div class="wf-table-row" style="display:grid;grid-template-columns:2.5fr 1.5fr 0.8fr 0.8fr 0.6fr 0.6fr 0.6fr;gap:4px;padding:4px 6px;border-bottom:1px solid rgba(226,228,232,0.4)">
+            <div class="wf-cell" style="font-family:monospace;font-size:6px">UNIUTY/2021/0011</div><div class="wf-cell">Amara O.</div><div class="wf-cell"><input style="width:100%;border:1px solid var(--border);border-radius:3px;padding:2px 3px;font-size:7px;text-align:center" value="36" readonly></div><div class="wf-cell"><input style="width:100%;border:1px solid var(--border);border-radius:3px;padding:2px 3px;font-size:7px;text-align:center" value="51" readonly></div><div class="wf-cell" style="font-weight:600">87</div><div class="wf-cell"><span class="wf-pill pill-ok">A</span></div><div class="wf-cell"><span style="font-size:7px;color:var(--info);cursor:pointer">Save</span></div>
+          </div>
+          <div class="wf-table-row" style="display:grid;grid-template-columns:2.5fr 1.5fr 0.8fr 0.8fr 0.6fr 0.6fr 0.6fr;gap:4px;padding:4px 6px;border-bottom:1px solid rgba(226,228,232,0.4)">
+            <div class="wf-cell" style="font-family:monospace;font-size:6px">UNIUTY/2021/0045</div><div class="wf-cell">Tunde A.</div><div class="wf-cell"><input style="width:100%;border:1px solid var(--border);border-radius:3px;padding:2px 3px;font-size:7px;text-align:center" value="30" readonly></div><div class="wf-cell"><input style="width:100%;border:1px solid var(--border);border-radius:3px;padding:2px 3px;font-size:7px;text-align:center" value="43" readonly></div><div class="wf-cell" style="font-weight:600">73</div><div class="wf-cell"><span class="wf-pill pill-b">B</span></div><div class="wf-cell"><span style="font-size:7px;color:var(--info);cursor:pointer">Save</span></div>
+          </div>
+          <div class="wf-table-row" style="display:grid;grid-template-columns:2.5fr 1.5fr 0.8fr 0.8fr 0.6fr 0.6fr 0.6fr;gap:4px;padding:4px 6px">
+            <div class="wf-cell" style="font-family:monospace;font-size:6px">UNIUTY/2022/0200</div><div class="wf-cell">Fatima Y.</div><div class="wf-cell"><input style="width:100%;border:1px solid var(--border);border-radius:3px;padding:2px 3px;font-size:7px;text-align:center;border-color:var(--danger)" value="15" readonly></div><div class="wf-cell"><input style="width:100%;border:1px solid var(--border);border-radius:3px;padding:2px 3px;font-size:7px;text-align:center;border-color:var(--danger)" value="23" readonly></div><div class="wf-cell" style="font-weight:600;color:var(--danger)">38</div><div class="wf-cell"><span class="wf-pill pill-d">F</span></div><div class="wf-cell"><span style="font-size:7px;color:var(--info);cursor:pointer">Save</span></div>
+          </div>
+        </div>
+        <div style="background:var(--navy);color:var(--gold);border-radius:6px;padding:7px;text-align:center;font-size:9px;font-weight:500;margin-top:8px;cursor:pointer;opacity:0.5">Submit All Results (Requires Biometric)</div>
+      </div>
+    </div>
+
+    <div class="device">
+      <div class="device-label"><strong>Student — Dashboard</strong><span class="device-chip">300L · CSC</span></div>
+      <div class="wf" style="padding:12px">
+        <div class="wf-pg-title" style="font-size:11px">Good morning, Emeka</div>
+        <div class="wf-pg-sub">Saturday, April 12 · 2nd Semester</div>
+        <div class="wf-alert warn"><div class="wf-alert-dot"></div>Fee balance ₦47,500 outstanding — due April 30</div>
+        <div class="wf-kgrid">
+          <div class="wf-kcard"><div class="wf-kcard-lbl">CGPA</div><div class="wf-kcard-val" style="font-size:12px">4.12</div><div class="wf-kcard-sub">First Class</div></div>
+          <div class="wf-kcard"><div class="wf-kcard-lbl">Courses</div><div class="wf-kcard-val" style="font-size:12px">6</div></div>
+          <div class="wf-kcard"><div class="wf-kcard-lbl">Units</div><div class="wf-kcard-val" style="font-size:12px">94</div></div>
+          <div class="wf-kcard"><div class="wf-kcard-lbl">Attendance</div><div class="wf-kcard-val" style="font-size:12px">88%</div></div>
+        </div>
+        <div class="wf-two-col">
+          <div class="wf-panel">
+            <div class="wf-panel-title">Recent Results</div>
+            <div class="wf-table-row" style="display:grid;grid-template-columns:1.5fr 2fr 0.8fr 0.6fr;gap:4px;padding:4px 0">
+              <div class="wf-cell hdr">Code</div><div class="wf-cell hdr">Course</div><div class="wf-cell hdr">Score</div><div class="wf-cell hdr">Grade</div>
+            </div>
+            <div class="wf-table-row" style="display:grid;grid-template-columns:1.5fr 2fr 0.8fr 0.6fr;gap:4px;padding:4px 0">
+              <div class="wf-cell" style="font-size:7px;font-family:monospace">CSC 301</div><div class="wf-cell" style="font-size:7px">Data Structures</div><div class="wf-cell" style="font-weight:600">87%</div><div class="wf-cell"><span class="wf-pill pill-ok">A</span></div>
+            </div>
+            <div class="wf-table-row" style="display:grid;grid-template-columns:1.5fr 2fr 0.8fr 0.6fr;gap:4px;padding:4px 0">
+              <div class="wf-cell" style="font-size:7px;font-family:monospace">CSC 315</div><div class="wf-cell" style="font-size:7px">Operating Systems</div><div class="wf-cell" style="font-weight:600">91%</div><div class="wf-cell"><span class="wf-pill pill-ok">A</span></div>
+            </div>
+            <div class="wf-table-row" style="display:grid;grid-template-columns:1.5fr 2fr 0.8fr 0.6fr;gap:4px;padding:4px 0">
+              <div class="wf-cell" style="font-size:7px;font-family:monospace">STA 311</div><div class="wf-cell" style="font-size:7px">Statistics</div><div class="wf-cell">—</div><div class="wf-cell"><span class="wf-pill" style="background:var(--border);color:var(--muted)">Pend</span></div>
+            </div>
+          </div>
+          <div class="wf-rc">
+            <div class="wf-panel" style="text-align:center">
+              <div style="font-size:8px;font-weight:600;color:var(--navy);margin-bottom:8px;text-align:left">CGPA Standing</div>
+              <div style="width:56px;height:56px;border-radius:50%;border:6px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 6px;position:relative">
+                <div style="font-size:11px;font-weight:600;font-family:'Playfair Display',serif;color:var(--navy)">4.12</div>
+                <div style="font-size:7px;color:var(--muted)">/5.00</div>
+              </div>
+              <div style="font-size:8px;font-weight:600;color:var(--success)">First Class</div>
+            </div>
+            <div class="wf-panel">
+              <div class="wf-panel-title">Today's Schedule</div>
+              <div style="font-size:7px;margin-bottom:3px"><span style="color:var(--muted)">8AM</span> — CSC 301 Lecture</div>
+              <div style="font-size:7px;margin-bottom:3px"><span style="color:var(--muted)">11AM</span> — MTH 312 Tutorial</div>
+              <div style="font-size:7px"><span style="color:var(--muted)">2PM</span> — CSC 315 Lab</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wire-divider"></div>
+
+<!-- ═══════════════ WF-08: MOBILE ═══════════════ -->
+<div class="section" id="mobile">
+  <div class="sec-label">WF-08</div>
+  <div class="sec-title">Mobile — Responsive Layout</div>
+  <div class="sec-desc">On devices narrower than 768px, the sidebar collapses to a slide-in drawer triggered by a hamburger menu button. All grids collapse to single columns. Tables scroll horizontally.</div>
+
+  <div class="frame-row" style="grid-template-columns:repeat(4,1fr);gap:16px">
+    <!-- Login mobile -->
+    <div class="device">
+      <div class="device-label"><strong>Login</strong><span class="device-chip">375×812</span></div>
+      <div class="wf wf-login-bg" style="padding:16px;min-height:300px;justify-content:center">
+        <div style="background:#fff;border-radius:14px;padding:18px;width:100%">
+          <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);text-align:center">UNIUTY</div>
+          <div style="font-size:8px;color:var(--muted);text-align:center;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">University Portal</div>
+          <div style="height:1px;background:var(--border);margin-bottom:10px"></div>
+          <div class="wf-field"><label>Portal ID</label><input class="wf-input" placeholder="ADM-001 · LEC-xxxx…" readonly></div>
+          <div class="wf-field"><label>Password</label><input class="wf-input" type="password" placeholder="Enter password" readonly></div>
+          <div style="text-align:right;font-size:8px;color:var(--info);margin:-3px 0 8px;cursor:pointer">Forgot password?</div>
+          <div style="background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:6px;padding:7px 8px;display:flex;align-items:center;gap:7px;margin-bottom:8px">
+            <div style="width:22px;height:22px;background:rgba(201,168,76,0.15);border-radius:5px;display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="#8a6a1a" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5a6.5 6.5 0 016.5 6.5"/><path d="M8 5a3 3 0 013 3"/><path d="M8 5v3.5"/></svg></div>
+            <div><div style="font-size:8px;color:var(--warn);font-weight:500">Biometric Login</div><div style="font-size:7px;color:var(--muted)">Fingerprint · NFC · Facial</div></div>
+          </div>
+          <div style="background:var(--navy);color:var(--gold);border-radius:7px;padding:9px;text-align:center;font-size:11px;font-weight:500">Sign In</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard mobile -->
+    <div class="device">
+      <div class="device-label"><strong>Dashboard</strong><span class="device-chip">375×812</span></div>
+      <div class="wf">
+        <div class="wf-mobile-topbar">
+          <div class="wf-hamburger"><span></span><span></span><span></span></div>
+          <div style="font-size:9px;font-weight:500;color:var(--navy)">Dashboard</div>
+          <div class="wf-bio-live" style="font-size:7px;padding:2px 5px"><div class="wf-bio-dot"></div>Active</div>
+        </div>
+        <div style="padding:10px">
+          <div style="font-size:11px;font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:2px">Dashboard</div>
+          <div style="font-size:8px;color:var(--muted);margin-bottom:8px">System overview</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+            <div style="background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px"><div style="font-size:7px;color:var(--muted);text-transform:uppercase">Students</div><div style="font-size:14px;font-weight:500;font-family:'Playfair Display',serif">12,847</div></div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px"><div style="font-size:7px;color:var(--muted);text-transform:uppercase">Results</div><div style="font-size:14px;font-weight:500;font-family:'Playfair Display',serif">94%</div></div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px"><div style="font-size:7px;color:var(--muted);text-transform:uppercase">Staff</div><div style="font-size:14px;font-weight:500;font-family:'Playfair Display',serif">634</div></div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px"><div style="font-size:7px;color:var(--muted);text-transform:uppercase">Bio Verif.</div><div style="font-size:14px;font-weight:500;font-family:'Playfair Display',serif">8,419</div></div>
+          </div>
+          <div style="background:#ebf5ec;border:1px solid rgba(26,127,90,0.2);border-radius:5px;padding:6px 8px;font-size:7px;color:#0e5e3b;margin-bottom:4px">✓ All biometric modules online</div>
+          <div style="background:#fff5e0;border:1px solid rgba(201,168,76,0.3);border-radius:5px;padding:6px 8px;font-size:7px;color:#8a6a1a">⚠ 3 departments pending results — Apr 18</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar drawer mobile -->
+    <div class="device">
+      <div class="device-label"><strong>Sidebar Drawer Open</strong><span class="device-chip">375×812</span></div>
+      <div class="wf" style="position:relative;overflow:hidden">
+        <!-- Blurred content behind -->
+        <div style="filter:blur(1.5px);opacity:0.4">
+          <div class="wf-mobile-topbar">
+            <div class="wf-hamburger"><span></span><span></span><span></span></div>
+            <div style="font-size:9px;font-weight:500;color:var(--navy)">Dashboard</div>
+            <div style="width:20px"></div>
+          </div>
+          <div style="padding:10px;background:var(--cream);height:260px"></div>
+        </div>
+        <!-- Overlay -->
+        <div style="position:absolute;inset:0;background:rgba(10,22,40,0.5)"></div>
+        <!-- Drawer -->
+        <div style="position:absolute;top:0;bottom:0;left:0;width:160px;background:var(--navy);z-index:10;padding-top:0">
+          <div style="padding:10px 10px 8px;border-bottom:1px solid rgba(201,168,76,0.2)"><div style="font-family:'Playfair Display',serif;font-size:12px;color:var(--gold)">UNIUTY</div><div style="font-size:7px;color:rgba(201,168,76,0.5);letter-spacing:1px">UNIVERSITY PORTAL</div></div>
+          <div style="padding:6px 8px"><div style="background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:6px 8px"><div style="font-size:9px;color:#fff;font-weight:500">Dr. A. Dankwa</div><div style="font-size:7px;color:rgba(255,255,255,0.4)">ADM-001 · Admin</div></div></div>
+          <div style="font-size:7px;color:rgba(255,255,255,0.25);letter-spacing:1px;text-transform:uppercase;padding:6px 10px 2px">Overview</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;color:var(--gold);background:rgba(201,168,76,0.07);border-left:2px solid var(--gold);font-size:8px">● Dashboard</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;color:rgba(255,255,255,0.45);font-size:8px">○ Exam Results</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;color:rgba(255,255,255,0.45);font-size:8px">○ Biometric Auth</div>
+          <div style="font-size:7px;color:rgba(255,255,255,0.25);letter-spacing:1px;text-transform:uppercase;padding:6px 10px 2px">Management</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;color:rgba(255,255,255,0.45);font-size:8px">○ Students</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;color:rgba(255,255,255,0.45);font-size:8px">○ Faculty</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VC mobile -->
+    <div class="device">
+      <div class="device-label"><strong>VC — Approvals</strong><span class="device-chip">375×812</span></div>
+      <div class="wf">
+        <div class="wf-mobile-topbar">
+          <div class="wf-hamburger"><span></span><span></span><span></span></div>
+          <div style="font-size:9px;font-weight:500;color:var(--navy)">Approvals Queue</div>
+          <div class="wf-bio-live" style="font-size:7px;padding:2px 5px"><div class="wf-bio-dot"></div>Active</div>
+        </div>
+        <div style="padding:10px">
+          <div style="font-size:11px;font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:6px">Approvals Queue</div>
+          {['Result Correction','New Appointment','Budget Request'].map((t,i)=>`
+          <div style="background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+              <span class="wf-pill pill-b" style="font-size:7px">${t}</span>
+              <span class="wf-pill" style="background:#FCEAEA;color:#791f1f;font-size:7px">${i<2?'Urgent':'High'}</span>
+            </div>
+            <div style="font-size:8px;font-weight:500">Subject line here...</div>
+            <div style="font-size:7px;color:var(--muted);margin-top:2px">From: Dr. O. Nwosu · Apr 11</div>
+            <div style="display:flex;gap:5px;margin-top:6px">
+              <div style="flex:1;background:#EBF5EC;color:#0e5e3b;border-radius:5px;padding:4px;text-align:center;font-size:8px;cursor:pointer">Approve</div>
+              <div style="flex:1;background:#FCEAEA;color:#791f1f;border-radius:5px;padding:4px;text-align:center;font-size:8px;cursor:pointer">Decline</div>
+            </div>
+          </div>`).join('')}
+          <!-- Static version -->
+          <div style="background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="wf-pill pill-b" style="font-size:7px">Result Correction</span><span class="wf-pill" style="background:#FCEAEA;color:#791f1f;font-size:7px">Urgent</span></div>
+            <div style="font-size:8px;font-weight:500">CSC 301 — Score amendment</div>
+            <div style="font-size:7px;color:var(--muted);margin-top:2px">From: Dr. O. Nwosu · Apr 11</div>
+            <div style="display:flex;gap:5px;margin-top:6px">
+              <div style="flex:1;background:#EBF5EC;color:#0e5e3b;border-radius:5px;padding:4px;text-align:center;font-size:8px;cursor:pointer">Approve</div>
+              <div style="flex:1;background:#FCEAEA;color:#791f1f;border-radius:5px;padding:4px;text-align:center;font-size:8px;cursor:pointer">Decline</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:7px;padding:8px;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="wf-pill pill-b" style="font-size:7px">New Appointment</span><span class="wf-pill" style="background:#FCEAEA;color:#791f1f;font-size:7px">Urgent</span></div>
+            <div style="font-size:8px;font-weight:500">Dr. F. Garba — Asst. Lecturer</div>
+            <div style="font-size:7px;color:var(--muted);margin-top:2px">From: HR Office · Apr 10</div>
+            <div style="display:flex;gap:5px;margin-top:6px">
+              <div style="flex:1;background:#EBF5EC;color:#0e5e3b;border-radius:5px;padding:4px;text-align:center;font-size:8px;cursor:pointer">Approve</div>
+              <div style="flex:1;background:#FCEAEA;color:#791f1f;border-radius:5px;padding:4px;text-align:center;font-size:8px;cursor:pointer">Decline</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wire-divider"></div>
+
+<!-- ═══════════════ WF-09: AUTH FLOW ═══════════════ -->
+<div class="section" id="auth-flow">
+  <div class="sec-label">WF-09</div>
+  <div class="sec-title">Authentication & Recovery Flow Diagrams</div>
+  <div class="sec-desc">End-to-end flow for login (password + biometric) and password recovery (all roles). Decision points and outcomes shown.</div>
+
+  <!-- Login Flow -->
+  <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:12px">Login Flow</div>
+  <div style="overflow-x:auto;padding-bottom:16px;background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:24px">
+    <div class="flow">
+      <div class="flow-step"><div class="flow-box start">Enter Portal ID</div><div class="flow-label">Type username</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box decision">Role Detected?</div><div class="flow-label">Prefix check</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Show Role Chip</div><div class="flow-label">Icon + label displayed</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Enter Password</div><div class="flow-label">OR tap Biometric</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box decision">Valid Credentials?</div><div class="flow-label">Account lookup</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box decision">Attempt ≥ 3?</div><div class="flow-label">Lockout check</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box end">Portal Loaded</div><div class="flow-label">Role-based dashboard</div></div>
+    </div>
+    <div style="margin-top:12px;padding:10px;background:var(--cream);border-radius:7px;font-size:11px;color:var(--muted)">
+      <strong style="color:var(--navy)">Branch outcomes:</strong>&nbsp;
+      Invalid credentials → increment counter + show toast · &nbsp;
+      3 failures → 30s lockout · &nbsp;
+      Biometric path → BiometricAPI.scan() → success/fail · &nbsp;
+      Valid → fade transition to portal shell
+    </div>
+  </div>
+
+  <!-- Recovery Flow -->
+  <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:12px">Password Recovery Flow</div>
+  <div style="overflow-x:auto;background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:24px">
+    <div class="flow">
+      <div class="flow-step"><div class="flow-box start">Click "Forgot Password"</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box decision">Detect Role</div><div class="flow-label">From Portal ID prefix</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box decision">Admin?</div><div class="flow-label">Highest security tier</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Security Q + Email OTP</div><div class="flow-label">Admin policy</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Biometric Re-verify</div><div class="flow-label">Fingerprint or Retina</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Set New Password</div><div class="flow-label">Complexity enforced</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box end">Recovery Complete</div><div class="flow-label">Audit logged · CSO notified</div></div>
+    </div>
+    <div style="margin-top:12px;padding:10px;background:var(--cream);border-radius:7px;font-size:11px;color:var(--muted)">
+      <strong style="color:var(--navy)">Non-Admin paths:</strong>&nbsp;
+      VC → Email OTP only + Senate Registrar notified · &nbsp;
+      Lecturer → Email OTP + HoD alert · &nbsp;
+      Student → Email OTP only
+    </div>
+  </div>
+
+  <!-- Role Promotion Flow -->
+  <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:12px">VC → Admin Role Promotion Flow</div>
+  <div style="overflow-x:auto;background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px">
+    <div class="flow">
+      <div class="flow-step"><div class="flow-box start">Admin opens User Management</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Select VC Account</div><div class="flow-label">From dropdown</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Choose Target Role</div><div class="flow-label">Admin / Registrar / Bursar</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box decision">Confirm Dialog</div><div class="flow-label">Shows privilege change</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box">Admin Biometric Scan</div><div class="flow-label">Fingerprint required</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box decision">Verified?</div><div class="flow-label">BiometricAPI.scan()</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-box end">Role Updated + Audit Logged</div><div class="flow-label">Permanent record</div></div>
+    </div>
+    <div style="margin-top:12px;padding:10px;background:#FFF5E0;border:1px solid rgba(201,168,76,0.3);border-radius:7px;font-size:11px;color:var(--warn)">
+      <strong>Security note:</strong> Biometric failure at the promotion step cancels the action entirely. No role change is applied without verified Admin biometric signature. All events are written to BiometricAPI._auditTrail.
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="background:var(--navy);padding:24px 40px;margin-top:40px;text-align:center">
+  <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);margin-bottom:4px">UNIUTY University Portal — Wireframes</div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.35)">UNIUTY-ICT-WF-001 v1.0 · ICT Development Unit · June 2026 · For internal use only</div>
+</div>
+
+<script>
+function setActive(el) {
+  document.querySelectorAll('.toc a').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+}
+// Highlight on scroll
+const sections = document.querySelectorAll('.section[id]');
+const links    = document.querySelectorAll('.toc a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  links.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deployment — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">Deployment &amp; Maintenance Plan</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#hosting">Hosting Infrastructure</a></li>
+        <li><a href="#cicd">CI/CD Pipeline</a></li>
+        <li><a href="#environments">Environments</a></li>
+        <li><a href="#monitoring">Monitoring &amp; Alerting</a></li>
+        <li><a href="#backup">Backup &amp; Recovery</a></li>
+        <li><a href="#maintenance">Maintenance Schedule</a></li>
+        <li><a href="#sla">SLA</a></li>
+        <li><a href="#rollback">Rollback Procedure</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">Deployment &amp; Maintenance Plan</h1>
+      <p class="doc-lead">Infrastructure options, CI/CD pipeline design, environment configuration, monitoring setup, backup procedures, and rollback strategy for the UNIUTY Portal.</p>
+
+      <!-- HOSTING -->
+      <h2 class="doc-h2" id="hosting">1. Hosting Infrastructure</h2>
+      <p>Three hosting models are supported. The recommended default is <strong>Cloud (AWS Nigeria Region)</strong>. On-premise is available for institutions with data sovereignty requirements.</p>
+
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Model</th><th>Provider</th><th>Pros</th><th>Cons</th><th>Recommended For</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="pill pill-ok">Recommended</span> Cloud</td>
+              <td>AWS (af-south-1 Cape Town + eu-west-1 Ireland)</td>
+              <td>Managed services, auto-scaling, global CDN, low ops overhead</td>
+              <td>Data egress costs; requires steady internet from campus</td>
+              <td>UNIUTY primary deployment</td>
+            </tr>
+            <tr>
+              <td>Cloud Alternative</td>
+              <td>Microsoft Azure (southafricanorth) or Google Cloud</td>
+              <td>Similar to AWS; Azure has existing NGA institutional agreements</td>
+              <td>Some services not available in Africa regions</td>
+              <td>If university has existing Azure/GCP contract</td>
+            </tr>
+            <tr>
+              <td>On-Premise</td>
+              <td>University data centre (VMware/Proxmox VMs)</td>
+              <td>Full data sovereignty; no egress costs; NCC compliance easier</td>
+              <td>High ops burden; hardware procurement; manual scaling</td>
+              <td>Institutions with bandwidth constraints or data laws</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">1.1 Cloud Infrastructure Spec (AWS)</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Component</th><th>Service</th><th>Spec</th><th>Count</th></tr></thead>
+          <tbody>
+            <tr><td>Application Server</td><td>EC2 / ECS Fargate</td><td>t3.large (2 vCPU, 8GB RAM)</td><td>3 (auto-scale 3–10)</td></tr>
+            <tr><td>PostgreSQL Primary</td><td>RDS PostgreSQL 16</td><td>db.t3.large, 100GB SSD, Multi-AZ</td><td>1 primary + 1 replica</td></tr>
+            <tr><td>Redis</td><td>ElastiCache Redis 7</td><td>cache.t3.medium</td><td>1 (cluster mode)</td></tr>
+            <tr><td>File Storage</td><td>S3</td><td>Standard + Intelligent-Tiering</td><td>2 buckets (primary + backup)</td></tr>
+            <tr><td>Load Balancer</td><td>Application Load Balancer (ALB)</td><td>Standard</td><td>1 (multi-AZ)</td></tr>
+            <tr><td>CDN / WAF</td><td>Cloudflare Pro</td><td>Global edge + WAF rules</td><td>1 zone</td></tr>
+            <tr><td>Container Registry</td><td>ECR</td><td>Private</td><td>1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CI/CD PIPELINE -->
+      <h2 class="doc-h2" id="cicd">2. CI/CD Pipeline</h2>
+      <p>The pipeline is implemented with <strong>GitHub Actions</strong>. Every push to a feature branch triggers the quality gates; merges to <code>main</code> deploy to staging automatically; production deployments require a manual approval gate.</p>
+
+      <pre>
+# .github/workflows/ci-cd.yml (simplified)
+
+name: UNIUTY Portal CI/CD
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─── Stage 1: Quality Gates ─────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run lint          # ESLint + Prettier check
+
+  unit-test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - run: npm run test:unit     # Jest — coverage threshold 80%
+      - uses: codecov/codecov-action@v4
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: unit-test
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_DB: uniuty_test, ... }
+      redis:
+        image: redis:7
+    steps:
+      - run: npm run test:integration  # Supertest against real DB
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - run: npm audit --audit-level high
+      - uses: snyk/actions/node@master  # Dependency vulnerability scan
+
+  # ─── Stage 2: Build ──────────────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    needs: [integration-test, security-scan]
+    steps:
+      - run: docker build -t uniuty-portal:${{ github.sha }} .
+      - run: docker push $ECR_REGISTRY/uniuty-portal:${{ github.sha }}
+
+  # ─── Stage 3: Deploy to Staging ──────────────────────────
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - run: kubectl set image deployment/api api=$ECR_REGISTRY/uniuty-portal:${{ github.sha }} -n staging
+      - run: kubectl rollout status deployment/api -n staging
+      - run: npm run test:e2e:staging  # Playwright smoke tests
+
+  # ─── Stage 4: Production (manual approval required) ──────
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment:
+      name: production
+      url: https://portal.uniuty.edu.ng
+    # Requires manual approval in GitHub Environments
+    steps:
+      - run: kubectl set image deployment/api api=$ECR_REGISTRY/uniuty-portal:${{ github.sha }} -n production
+      - run: kubectl rollout status deployment/api -n production
+</pre>
+
+      <!-- ENVIRONMENTS -->
+      <h2 class="doc-h2" id="environments">3. Environment Configuration</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Variable</th><th>Development</th><th>Staging</th><th>Production</th></tr></thead>
+          <tbody>
+            <tr><td>NODE_ENV</td><td>development</td><td>staging</td><td>production</td></tr>
+            <tr><td>DATABASE_URL</td><td>postgresql://localhost/uniuty_dev</td><td>RDS staging endpoint</td><td>RDS prod endpoint (Multi-AZ)</td></tr>
+            <tr><td>REDIS_URL</td><td>redis://localhost:6379</td><td>ElastiCache staging</td><td>ElastiCache prod</td></tr>
+            <tr><td>JWT_SECRET</td><td>dev-secret-local</td><td>Stored in AWS Secrets Manager</td><td>Stored in AWS Secrets Manager (rotated quarterly)</td></tr>
+            <tr><td>PAYMENT_GATEWAY_MODE</td><td>sandbox</td><td>sandbox</td><td>live</td></tr>
+            <tr><td>BIOMETRIC_MODE</td><td>simulated</td><td>hardware</td><td>hardware</td></tr>
+            <tr><td>LOG_LEVEL</td><td>debug</td><td>info</td><td>warn + error</td></tr>
+            <tr><td>RATE_LIMIT_WINDOW</td><td>disabled</td><td>enabled</td><td>enabled</td></tr>
+            <tr><td>CORS_ORIGIN</td><td>*</td><td>staging.uniuty.edu.ng</td><td>portal.uniuty.edu.ng</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-warn">
+        All production secrets are stored in AWS Secrets Manager and injected as environment variables at container startup. Secrets are never stored in source code, Dockerfiles, or CI/CD logs.
+      </div>
+
+      <!-- MONITORING -->
+      <h2 class="doc-h2" id="monitoring">4. Monitoring &amp; Alerting</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Tool</th><th>Purpose</th><th>Alert Channels</th><th>Key Thresholds</th></tr></thead>
+          <tbody>
+            <tr><td>UptimeRobot</td><td>External uptime monitoring (every 1 min)</td><td>Email, SMS, Slack</td><td>Downtime &gt; 1 min → ALERT</td></tr>
+            <tr><td>Sentry</td><td>Application error tracking, stack traces</td><td>Slack #alerts, Email to Dev Lead</td><td>Error rate &gt; 1%/min → ALERT</td></tr>
+            <tr><td>New Relic APM</td><td>Performance monitoring (P95, throughput, DB)</td><td>Slack #performance, PagerDuty</td><td>P95 &gt; 2s sustained 5 min → WARN; &gt; 5s → ALERT</td></tr>
+            <tr><td>AWS CloudWatch</td><td>Infrastructure metrics (CPU, memory, disk, RDS)</td><td>SNS → Email + PagerDuty</td><td>RDS CPU &gt; 80% → WARN; &gt; 95% → ALERT</td></tr>
+            <tr><td>Loki + Grafana</td><td>Log aggregation and search</td><td>Grafana alerting → Slack</td><td>Error log spike &gt; 100/min → ALERT</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">4.1 Key Dashboards</h3>
+      <ul>
+        <li><strong>Operations Dashboard (Grafana):</strong> Request rate, error rate, P50/P95/P99 latency, DB connections, Redis hit rate, active sessions</li>
+        <li><strong>Business Dashboard (New Relic):</strong> Daily active users, logins per hour, results submitted/published, payments processed, biometric scans per day</li>
+        <li><strong>Security Dashboard:</strong> Failed login rate per IP, lockout events per hour, biometric failures, audit log volume anomalies</li>
+      </ul>
+
+      <!-- BACKUP & RECOVERY -->
+      <h2 class="doc-h2" id="backup">5. Backup &amp; Recovery</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Data Source</th><th>Backup Tool</th><th>Frequency</th><th>Retention</th><th>Offsite Replication</th></tr></thead>
+          <tbody>
+            <tr><td>PostgreSQL</td><td>pg_dump + RDS automated snapshots</td><td>Daily full + 5-min WAL</td><td>30 days full, 7 days WAL</td><td>Cross-region S3 (eu-west-1)</td></tr>
+            <tr><td>S3 (files)</td><td>S3 Cross-Region Replication</td><td>Continuous</td><td>90 days</td><td>eu-west-1 bucket</td></tr>
+            <tr><td>Redis</td><td>RDB snapshot</td><td>Every 30 min</td><td>24 hours</td><td>Not replicated (ephemeral data)</td></tr>
+            <tr><td>Secrets Manager</td><td>AWS Secrets Manager versioning</td><td>On every rotation</td><td>Indefinite</td><td>Managed by AWS</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">5.1 Recovery Procedure</h3>
+      <ol>
+        <li>Declare incident via Slack <code>#incidents</code> and assign Incident Commander</li>
+        <li>Assess: is this a partial failure (redirect to maintenance page) or full restore needed?</li>
+        <li>For full restore: provision new RDS instance from latest snapshot</li>
+        <li>Apply WAL logs to bring DB to RPO target (≤ 1 hour data loss)</li>
+        <li>Update application DATABASE_URL environment variable to point to new instance</li>
+        <li>Restart application containers; run smoke test suite</li>
+        <li>Verify monitoring dashboards show healthy state</li>
+        <li>Communicate to users via portal banner and email if recovery takes &gt; 30 minutes</li>
+        <li>Conduct post-incident review within 48 hours; update runbook</li>
+      </ol>
+
+      <!-- MAINTENANCE SCHEDULE -->
+      <h2 class="doc-h2" id="maintenance">6. Maintenance Schedule</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Maintenance Type</th><th>Frequency</th><th>Window</th><th>Expected Downtime</th></tr></thead>
+          <tbody>
+            <tr><td>Application updates (minor patches)</td><td>Bi-weekly</td><td>Sunday 02:00–04:00 WAT</td><td>0 (rolling deploy)</td></tr>
+            <tr><td>Database minor version updates</td><td>Monthly</td><td>Sunday 02:00–06:00 WAT</td><td>&lt; 30 seconds (RDS Multi-AZ failover)</td></tr>
+            <tr><td>Database major version upgrades</td><td>Annual</td><td>Semester break (Jul/Aug or Dec/Jan)</td><td>Up to 4 hours (planned maintenance)</td></tr>
+            <tr><td>Security patches (OS, libraries)</td><td>Within 7 days of CVE (critical) / 30 days (high)</td><td>Any low-traffic window</td><td>0 (rolling)</td></tr>
+            <tr><td>Biometric hardware firmware update</td><td>Quarterly</td><td>Weekend morning (semester break preferred)</td><td>30 min per terminal</td></tr>
+            <tr><td>Biometric hardware calibration</td><td>Quarterly</td><td>During scheduled enrollment sessions</td><td>None (background calibration)</td></tr>
+            <tr><td>SSL/TLS certificate renewal</td><td>Auto-renew (Let's Encrypt / ACM)</td><td>Automatic, 30 days before expiry</td><td>0</td></tr>
+            <tr><td>Backup restoration drill</td><td>Quarterly</td><td>In isolated test environment</td><td>0 (test env)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">6.1 Biometric Hardware Maintenance Detail</h3>
+      <ul>
+        <li><strong>Quarterly Calibration:</strong> ICT hardware specialist runs the BiometricAPI calibration routine per device; checks false rejection rate and false acceptance rate against baseline</li>
+        <li><strong>Firmware Updates:</strong> Vendor firmware downloaded, tested on one terminal first, then rolled out to all terminals over 2 hours</li>
+        <li><strong>Sensor Cleaning:</strong> Optical fingerprint sensors cleaned monthly with manufacturer-approved solution</li>
+        <li><strong>Template Re-enrollment Trigger:</strong> If a device's FRR (False Rejection Rate) exceeds 5% post-calibration, affected users are flagged for re-enrollment</li>
+      </ul>
+
+      <!-- SLA -->
+      <h2 class="doc-h2" id="sla">7. Service Level Agreement (SLA)</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Metric</th><th>Target</th><th>Measurement Period</th><th>Exclusions</th></tr></thead>
+          <tbody>
+            <tr><td>System Availability (Uptime)</td><td>≥ 99.9% (max 8.7h downtime/year)</td><td>Monthly rolling</td><td>Scheduled maintenance windows; force majeure</td></tr>
+            <tr><td>P95 Page Response Time</td><td>&lt; 2 seconds</td><td>Monthly P95</td><td>Peak result-day surge (defined as &gt; 12,000 concurrent users)</td></tr>
+            <tr><td>Biometric Scan Response</td><td>&lt; 3 seconds (P95)</td><td>Monthly P95</td><td>Network connectivity failures between terminal and server</td></tr>
+            <tr><td>Payment Reconciliation</td><td>Real-time on webhook receipt; max 30-min delay on webhook failure</td><td>Per transaction</td><td>Payment gateway outages</td></tr>
+            <tr><td>Incident Response — SEV-1</td><td>Acknowledge ≤ 15 min; mitigate ≤ 2h</td><td>Per incident</td><td>—</td></tr>
+            <tr><td>Incident Response — SEV-2</td><td>Acknowledge ≤ 30 min; resolve ≤ 8h</td><td>Per incident</td><td>—</td></tr>
+            <tr><td>Planned Maintenance Notification</td><td>≥ 48 hours advance notice</td><td>Per maintenance event</td><td>Emergency security patches</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ROLLBACK -->
+      <h2 class="doc-h2" id="rollback">8. Rollback Procedure</h2>
+      <p>The UNIUTY Portal uses a <strong>blue-green deployment strategy</strong> for production releases. At any time, both the current version (green) and the previous version (blue) are available, enabling instant rollback.</p>
+
+      <h3 class="doc-h3">8.1 Blue-Green Strategy</h3>
+      <div class="callout callout-info">
+        <strong>Blue-Green:</strong> Two identical production environments run in parallel. Traffic is routed to "green" (active) via the load balancer. On a new deployment, "blue" receives the new version. After smoke tests pass, traffic switches from green → blue (new). The old green environment is kept warm for 24 hours for instant rollback.
+      </div>
+
+      <h3 class="doc-h3">8.2 Rollback Decision Criteria</h3>
+      <ul>
+        <li>Error rate &gt; 5% within 15 minutes of deployment</li>
+        <li>P95 latency &gt; 5 seconds sustained for 5 minutes</li>
+        <li>Any P1 security issue discovered post-deploy</li>
+        <li>Sentry error volume &gt; 200% of baseline within 10 minutes</li>
+        <li>Manual decision by Project Manager or ICT Director</li>
+      </ul>
+
+      <h3 class="doc-h3">8.3 Rollback Steps</h3>
+      <ol>
+        <li>ICT Director or Project Manager declares rollback in <code>#incidents</code> Slack</li>
+        <li>DevOps engineer updates Kubernetes Deployment to previous image tag:<br/>
+          <pre>kubectl set image deployment/api api=$ECR_REGISTRY/uniuty-portal:PREVIOUS_SHA -n production
+kubectl rollout status deployment/api -n production</pre>
+        </li>
+        <li>ALB health checks confirm all pods healthy on previous version (typically &lt; 90 seconds)</li>
+        <li>Run smoke test suite to confirm rollback successful</li>
+        <li>If DB migration was included in the bad deploy, run down-migration script:<br/>
+          <pre>npm run migrate:down --steps=1</pre>
+        </li>
+        <li>Post incident Slack update: "Portal rolled back to vX.Y.Z — stable"</li>
+        <li>Post-mortem scheduled within 48 hours; root cause identified before re-deploy</li>
+      </ol>
+
+      <h3 class="doc-h3">8.4 Canary Release (for Major Versions)</h3>
+      <p>For major version releases (e.g. v1.0, v2.0), traffic is shifted gradually using Kubernetes traffic splitting:</p>
+      <ul>
+        <li>5% → 25% → 50% → 100% with 30-minute observation windows between shifts</li>
+        <li>Automatic rollback triggered if error rate exceeds threshold at any stage</li>
+        <li>This strategy allows real-user validation while limiting blast radius</li>
+      </ul>
+
+    </main>
+  </div>
+</body>
+</html>

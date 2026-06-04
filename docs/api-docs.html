@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Docs — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">API Documentation</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#authentication">Authentication</a></li>
+        <li><a href="#auth-endpoints">Auth Endpoints</a></li>
+        <li><a href="#user-endpoints">User Endpoints</a></li>
+        <li><a href="#results-endpoints">Results Endpoints</a></li>
+        <li><a href="#biometric-endpoints">Biometric Endpoints</a></li>
+        <li><a href="#fees-endpoints">Fees Endpoints</a></li>
+        <li><a href="#error-codes">Error Codes</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">API Documentation</h1>
+      <p class="doc-lead">Complete REST API reference for the UNIUTY Portal backend. All endpoints return JSON. Authentication is required for all endpoints unless marked public.</p>
+
+      <!-- OVERVIEW -->
+      <h2 class="doc-h2" id="overview">1. Overview</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Base URL (Production)</td><td><code>https://api.uniuty.edu.ng/api/v1</code></td></tr>
+            <tr><td>Base URL (Staging)</td><td><code>https://staging-api.uniuty.edu.ng/api/v1</code></td></tr>
+            <tr><td>Protocol</td><td>HTTPS only (HTTP redirected to HTTPS)</td></tr>
+            <tr><td>Content-Type</td><td><code>application/json</code></td></tr>
+            <tr><td>Authentication</td><td>Bearer JWT in <code>Authorization</code> header</td></tr>
+            <tr><td>Rate Limiting</td><td>100 requests/minute per IP; 20 requests/minute for auth endpoints</td></tr>
+            <tr><td>API Versioning</td><td>URL path versioning (<code>/v1/</code>); breaking changes bump to <code>/v2/</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- AUTHENTICATION -->
+      <h2 class="doc-h2" id="authentication">2. Authentication</h2>
+      <p>The API uses <strong>JWT Bearer tokens</strong>. Obtain a token via <code>POST /api/auth/login</code>. Include the token in every subsequent request:</p>
+      <pre>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+
+      <p>Tokens expire after <strong>8 hours</strong>. Use the refresh token (stored in an HttpOnly cookie) to obtain a new access token via <code>POST /api/auth/refresh</code> without re-login.</p>
+
+      <div class="callout callout-warn">
+        <strong>Biometric-Required Actions:</strong> Certain endpoints (result submission, role changes, VC approvals) require an additional <code>X-Bio-Token</code> header containing a short-lived biometric verification token obtained from <code>POST /api/biometric/scan</code>.
+      </div>
+
+      <!-- AUTH ENDPOINTS -->
+      <h2 class="doc-h2" id="auth-endpoints">3. Auth Endpoints</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/auth/login</span>
+          <span class="ep-desc">Authenticate a user and receive a JWT access token</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-ok">Public</span> No authentication required.</p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>portal_id</td><td>string</td><td>Yes</td><td>User's Portal ID (e.g. STU-2024-001)</td></tr>
+              <tr><td>password</td><td>string</td><td>Yes</td><td>User's password</td></tr>
+            </tbody>
+          </table>
+          <pre>{
+  "portal_id": "STU-2024-001",
+  "password": "SecurePass@123"
+}</pre>
+          <p><strong>200 Response:</strong></p>
+          <pre>{
+  "success": true,
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiJ9...",
+    "token_type": "Bearer",
+    "expires_in": 28800,
+    "user": {
+      "user_id": "uuid-...",
+      "name": "Chioma Eze",
+      "role": "student",
+      "portal_id": "STU-2024-001"
+    }
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/auth/logout</span>
+          <span class="ep-desc">Invalidate the current session token</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-info">Auth Required</span> Adds the current JWT to the Redis denylist.</p>
+          <p><strong>200 Response:</strong></p>
+          <pre>{ "success": true, "message": "Logged out successfully" }</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/auth/refresh</span>
+          <span class="ep-desc">Obtain a new access token using the refresh token cookie</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-ok">Cookie Auth</span> The refresh token is read from the <code>uniuty_rt</code> HttpOnly cookie.</p>
+          <p><strong>200 Response:</strong></p>
+          <pre>{ "success": true, "data": { "access_token": "eyJ...", "expires_in": 28800 } }</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/auth/forgot-password</span>
+          <span class="ep-desc">Request a password reset OTP via email</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-ok">Public</span> Rate limited to 3 requests per hour per IP.</p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>portal_id</td><td>string</td><td>Yes*</td><td>User's Portal ID</td></tr>
+              <tr><td>email</td><td>string</td><td>Yes*</td><td>Registered email (*one of portal_id or email required)</td></tr>
+            </tbody>
+          </table>
+          <p><strong>200 Response</strong> (same whether user exists or not):</p>
+          <pre>{ "success": true, "message": "If that account exists, a reset OTP has been sent." }</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/auth/reset-password</span>
+          <span class="ep-desc">Reset password using OTP token</span>
+        </div>
+        <div class="ep-body">
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>otp</td><td>string</td><td>Yes</td><td>6-digit OTP from email</td></tr>
+              <tr><td>reset_token</td><td>string</td><td>Yes</td><td>Token returned with OTP email (expires 15 min)</td></tr>
+              <tr><td>new_password</td><td>string</td><td>Yes</td><td>New password (min 8 chars, 1 uppercase, 1 number, 1 special)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- USER ENDPOINTS -->
+      <h2 class="doc-h2" id="user-endpoints">4. User Endpoints</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/users</span>
+          <span class="ep-desc">List all users with optional filters</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin / VC only</span></p>
+          <table class="param-table">
+            <thead><tr><th>Query Param</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>role</td><td>string</td><td>Filter by role: student | lecturer | admin | vc</td></tr>
+              <tr><td>department_id</td><td>uuid</td><td>Filter by department</td></tr>
+              <tr><td>status</td><td>string</td><td>active | suspended | locked</td></tr>
+              <tr><td>page</td><td>int</td><td>Page number (default 1)</td></tr>
+              <tr><td>limit</td><td>int</td><td>Results per page (default 50, max 200)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/users/:id</span>
+          <span class="ep-desc">Get a single user by ID</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin / VC</span> or the user themselves.</p>
+          <p><strong>200 Response:</strong></p>
+          <pre>{
+  "success": true,
+  "data": {
+    "user_id": "3f2e1d...",
+    "portal_id": "STU-2024-001",
+    "name": "Chioma Eze",
+    "email": "c.eze@uniuty.edu.ng",
+    "role": "student",
+    "created_at": "2024-09-01T08:00:00Z",
+    "profile": {
+      "matric_number": "24/CSC/001",
+      "department": "Computer Science",
+      "level": 100,
+      "cgpa": 3.87
+    }
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/users</span>
+          <span class="ep-desc">Create a new user account</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin only</span></p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>name</td><td>string</td><td>Yes</td><td>Full name</td></tr>
+              <tr><td>email</td><td>string</td><td>Yes</td><td>Institutional email address</td></tr>
+              <tr><td>role</td><td>string</td><td>Yes</td><td>student | lecturer | admin | vc</td></tr>
+              <tr><td>department_id</td><td>uuid</td><td>Yes</td><td>Department UUID</td></tr>
+              <tr><td>matric_number</td><td>string</td><td>Cond.</td><td>Required if role = student</td></tr>
+              <tr><td>staff_number</td><td>string</td><td>Cond.</td><td>Required if role = lecturer | admin</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method put">PUT</span>
+          <span class="ep-path">/api/users/:id</span>
+          <span class="ep-desc">Update user profile details</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin</span> or the user themselves (limited fields).</p>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method delete">DELETE</span>
+          <span class="ep-path">/api/users/:id</span>
+          <span class="ep-desc">Deactivate a user account</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin only</span> Soft deletes — sets status to <code>deactivated</code>. Biometric templates are automatically purged.</p>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method put">PUT</span>
+          <span class="ep-path">/api/users/:id/role</span>
+          <span class="ep-desc">Change a user's role</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin</span> (requires VC approval for Admin/VC promotions). Requires <code>X-Bio-Token</code> header.</p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>new_role</td><td>string</td><td>Yes</td><td>Target role</td></tr>
+              <tr><td>justification</td><td>string</td><td>Yes</td><td>Reason for role change (min 20 chars)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RESULTS ENDPOINTS -->
+      <h2 class="doc-h2" id="results-endpoints">5. Results Endpoints</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/results</span>
+          <span class="ep-desc">List result batches (admin view) or own results (student)</span>
+        </div>
+        <div class="ep-body">
+          <table class="param-table">
+            <thead><tr><th>Query Param</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>course_id</td><td>uuid</td><td>Filter by course</td></tr>
+              <tr><td>session</td><td>string</td><td>e.g. 2025/2026</td></tr>
+              <tr><td>semester</td><td>int</td><td>1 or 2</td></tr>
+              <tr><td>status</td><td>string</td><td>draft | pending | approved | published</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/results</span>
+          <span class="ep-desc">Submit a result batch for a course</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-warn">Lecturer only</span> Requires <code>X-Bio-Token</code> header for final submission.</p>
+          <pre>{
+  "course_id": "uuid-...",
+  "session": "2025/2026",
+  "semester": 2,
+  "scores": [
+    { "student_id": "uuid-...", "ca_score": 25, "exam_score": 58 },
+    { "student_id": "uuid-...", "ca_score": 28, "exam_score": 65 }
+  ]
+}</pre>
+          <p><strong>201 Response:</strong></p>
+          <pre>{
+  "success": true,
+  "data": {
+    "batch_id": "uuid-...",
+    "status": "pending",
+    "records_submitted": 87,
+    "submitted_at": "2026-01-15T14:32:00Z"
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/results/:studentId</span>
+          <span class="ep-desc">Get all published results for a student</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-info">Student</span> (own results only) | <span class="pill pill-danger">Admin / VC / Lecturer</span> (assigned course students)</p>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method put">PUT</span>
+          <span class="ep-path">/api/results/:id</span>
+          <span class="ep-desc">Approve, reject, or update a result record</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin only</span> for approval/rejection. Lecturer can edit within amendment window.</p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>action</td><td>string</td><td>approve | reject | edit</td></tr>
+              <tr><td>notes</td><td>string</td><td>Required for rejection; optional for approval</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/results/export</span>
+          <span class="ep-desc">Export result transcript as PDF</span>
+        </div>
+        <div class="ep-body">
+          <p>Returns a PDF file stream. Student must have no outstanding fees (cleared status).</p>
+          <table class="param-table">
+            <thead><tr><th>Query Param</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>student_id</td><td>uuid</td><td>Target student (Admin) or omit for own (Student)</td></tr>
+              <tr><td>format</td><td>string</td><td>pdf | csv (default: pdf)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BIOMETRIC ENDPOINTS -->
+      <h2 class="doc-h2" id="biometric-endpoints">6. Biometric Endpoints</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/biometric/scan</span>
+          <span class="ep-desc">Perform a biometric verification scan</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-warn">Terminal Auth</span> Called from authenticated biometric terminal devices.</p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>user_id</td><td>uuid</td><td>Yes</td><td>User to verify (1:1 mode)</td></tr>
+              <tr><td>method</td><td>string</td><td>Yes</td><td>fingerprint | retina | facial | nfc</td></tr>
+              <tr><td>purpose</td><td>string</td><td>Yes</td><td>login | exam | attendance | approval</td></tr>
+              <tr><td>location</td><td>string</td><td>Yes</td><td>Terminal location identifier</td></tr>
+            </tbody>
+          </table>
+          <p><strong>200 Response:</strong></p>
+          <pre>{
+  "success": true,
+  "data": {
+    "result": "VERIFIED",
+    "confidence": 98.4,
+    "bio_token": "short-lived-token-abc123",
+    "bio_token_expires": "2026-06-04T14:47:00Z",
+    "user": { "user_id": "uuid-...", "name": "Emeka Obi" }
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/biometric/enroll</span>
+          <span class="ep-desc">Enroll a user's biometric template</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin only</span> Must be performed at a registered terminal.</p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>user_id</td><td>uuid</td><td>Yes</td><td>User to enroll</td></tr>
+              <tr><td>method</td><td>string</td><td>Yes</td><td>fingerprint | retina | facial | nfc</td></tr>
+              <tr><td>samples</td><td>array</td><td>Yes</td><td>3 biometric sample payloads from the device driver</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method delete">DELETE</span>
+          <span class="ep-path">/api/biometric/:userId/:method</span>
+          <span class="ep-desc">Delete a user's biometric template for a specific method</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin only</span> Irreversible. Triggers audit log entry. Use <code>all</code> as method to delete all templates.</p>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/biometric/log</span>
+          <span class="ep-desc">Retrieve biometric event log</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-danger">Admin / VC only</span></p>
+          <table class="param-table">
+            <thead><tr><th>Query Param</th><th>Type</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>user_id</td><td>uuid</td><td>Filter by user</td></tr>
+              <tr><td>method</td><td>string</td><td>Filter by biometric method</td></tr>
+              <tr><td>result</td><td>string</td><td>VERIFIED | FAILED</td></tr>
+              <tr><td>from</td><td>ISO8601</td><td>Start date</td></tr>
+              <tr><td>to</td><td>ISO8601</td><td>End date</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FEES ENDPOINTS -->
+      <h2 class="doc-h2" id="fees-endpoints">7. Fees Endpoints</h2>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/fees/:studentId</span>
+          <span class="ep-desc">Get fee summary for a student</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-info">Student</span> (own fees) | <span class="pill pill-danger">Admin / VC</span> (any student)</p>
+          <p><strong>200 Response:</strong></p>
+          <pre>{
+  "success": true,
+  "data": {
+    "fee_id": "uuid-...",
+    "session": "2025/2026",
+    "total_amount": 250000,
+    "amount_paid": 150000,
+    "balance": 100000,
+    "status": "partial",
+    "due_date": "2026-02-28",
+    "payments": [
+      {
+        "payment_id": "uuid-...",
+        "amount": 150000,
+        "method": "online",
+        "gateway": "remita",
+        "reference": "REM-2025-001",
+        "paid_at": "2025-11-01T10:00:00Z"
+      }
+    ]
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method post">POST</span>
+          <span class="ep-path">/api/payments</span>
+          <span class="ep-desc">Initiate a fee payment session</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-info">Student</span></p>
+          <table class="param-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>fee_id</td><td>uuid</td><td>Yes</td><td>Fee record to pay against</td></tr>
+              <tr><td>amount</td><td>number</td><td>Yes</td><td>Amount to pay in Naira (partial payments allowed)</td></tr>
+              <tr><td>gateway</td><td>string</td><td>Yes</td><td>remita | flutterwave</td></tr>
+            </tbody>
+          </table>
+          <p><strong>201 Response:</strong></p>
+          <pre>{
+  "success": true,
+  "data": {
+    "payment_id": "uuid-...",
+    "checkout_url": "https://remita.net/checkout/...",
+    "reference": "UNIUTY-2026-00087",
+    "expires_at": "2026-06-04T15:30:00Z"
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint">
+        <div class="endpoint-hdr">
+          <span class="method get">GET</span>
+          <span class="ep-path">/api/payments/:studentId</span>
+          <span class="ep-desc">Get full payment history for a student</span>
+        </div>
+        <div class="ep-body">
+          <p><span class="pill pill-info">Student</span> (own history) | <span class="pill pill-danger">Admin / VC</span></p>
+        </div>
+      </div>
+
+      <!-- ERROR CODES -->
+      <h2 class="doc-h2" id="error-codes">8. Error Codes</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>HTTP Status</th><th>Error Code</th><th>Meaning</th><th>Common Causes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="pill pill-warn">400</span></td><td>BAD_REQUEST</td><td>Malformed request</td><td>Missing required fields, invalid JSON, wrong data types</td></tr>
+            <tr><td><span class="pill pill-warn">401</span></td><td>UNAUTHORIZED</td><td>Authentication required or token expired</td><td>Missing Authorization header, expired JWT, invalid token signature</td></tr>
+            <tr><td><span class="pill pill-warn">403</span></td><td>FORBIDDEN</td><td>Insufficient permissions</td><td>Role does not have access to this resource or action</td></tr>
+            <tr><td><span class="pill pill-warn">404</span></td><td>NOT_FOUND</td><td>Resource not found</td><td>Invalid UUID, deleted resource, wrong endpoint path</td></tr>
+            <tr><td><span class="pill pill-warn">409</span></td><td>CONFLICT</td><td>Resource already exists</td><td>Duplicate email, matric number, or payment reference</td></tr>
+            <tr><td><span class="pill pill-warn">422</span></td><td>UNPROCESSABLE</td><td>Validation failed</td><td>Score out of range, invalid semester value, password too weak</td></tr>
+            <tr><td><span class="pill pill-danger">429</span></td><td>RATE_LIMITED</td><td>Too many requests</td><td>Exceeded 100 req/min per IP or 20 req/min for auth endpoints</td></tr>
+            <tr><td><span class="pill pill-danger">500</span></td><td>SERVER_ERROR</td><td>Internal server error</td><td>Unhandled exception; check Sentry for trace ID</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>All error responses follow this structure:</p>
+      <pre>{
+  "success": false,
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "You do not have permission to perform this action.",
+    "trace_id": "sentry-trace-abc123"
+  }
+}</pre>
+
+    </main>
+  </div>
+</body>
+</html>

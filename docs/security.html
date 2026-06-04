@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">Security Requirements</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#auth-sec">Authentication Security</a></li>
+        <li><a href="#bio-sec">Biometric Security</a></li>
+        <li><a href="#data-protection">Data Protection</a></li>
+        <li><a href="#ndpr">NDPR Compliance</a></li>
+        <li><a href="#rbac">Access Control (RBAC)</a></li>
+        <li><a href="#audit">Audit &amp; Logging</a></li>
+        <li><a href="#backup">Backup Strategy</a></li>
+        <li><a href="#incident">Incident Response</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">Security Requirements</h1>
+      <p class="doc-lead">Comprehensive security design for the UNIUTY Portal covering authentication hardening, biometric data protection, NDPR compliance, role-based access control, and incident response procedures.</p>
+
+      <div class="callout callout-warn">
+        <strong>Compliance Note:</strong> The UNIUTY Portal handles personally identifiable information (PII) for over 13,000 individuals and is subject to the Nigeria Data Protection Regulation (NDPR) 2019. All security measures documented here are minimum requirements, not optional enhancements.
+      </div>
+
+      <!-- AUTHENTICATION SECURITY -->
+      <h2 class="doc-h2" id="auth-sec">1. Authentication Security</h2>
+
+      <h3 class="doc-h3">1.1 Password Policy</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Requirement</th><th>Specification</th><th>Enforcement</th></tr></thead>
+          <tbody>
+            <tr><td>Minimum length</td><td>8 characters</td><td>Validated on client and server</td></tr>
+            <tr><td>Complexity</td><td>At least 1 uppercase, 1 number, 1 special character</td><td>Regex validation server-side</td></tr>
+            <tr><td>Common password rejection</td><td>Checked against HIBP top-10k list</td><td>Server-side check on set/change</td></tr>
+            <tr><td>Hashing algorithm</td><td>bcrypt with cost factor 12</td><td>Applied at every password write</td></tr>
+            <tr><td>Password history</td><td>Cannot reuse last 5 passwords</td><td>Stored as hashed list per user</td></tr>
+            <tr><td>Forced rotation</td><td>First login (temporary password must change)</td><td>Middleware intercepts first login</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">1.2 JWT Configuration</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Algorithm</td><td>HS256 (symmetric) — RS256 (asymmetric) for production</td></tr>
+            <tr><td>Access token expiry</td><td>8 hours (<code>exp</code> claim)</td></tr>
+            <tr><td>Refresh token expiry</td><td>30 days (stored HttpOnly cookie)</td></tr>
+            <tr><td>Issuer (<code>iss</code>)</td><td><code>uniuty.edu.ng</code></td></tr>
+            <tr><td>Audience (<code>aud</code>)</td><td><code>uniuty-portal-api</code></td></tr>
+            <tr><td>Token denylist</td><td>Redis SET — invalidated on logout / password change</td></tr>
+            <tr><td>Secret rotation</td><td>Quarterly; old tokens gracefully expire</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">1.3 Brute Force &amp; Lockout Policy</h3>
+      <ul>
+        <li>Account locked after <strong>5 consecutive failed login attempts</strong></li>
+        <li>Lockout duration: <strong>30 minutes</strong> (automatic unlock) or immediate admin unlock</li>
+        <li>Failed attempt counter resets on successful login</li>
+        <li>IP-level rate limiting: max <strong>20 auth requests per minute</strong> per IP (Redis sliding window)</li>
+        <li>CAPTCHA presented after 3 failed attempts (hCaptcha — no Google dependency)</li>
+        <li>Locked account triggers email notification to user and alert to duty admin</li>
+      </ul>
+
+      <h3 class="doc-h3">1.4 Session Management</h3>
+      <ul>
+        <li>Sessions invalidated on: password change, role change, manual logout, account suspension</li>
+        <li>Concurrent session limit: 3 active sessions per user (oldest invalidated on new login)</li>
+        <li>Session metadata logged: IP, user agent, location (city-level), timestamp</li>
+        <li>Admin and VC sessions require biometric re-verification every 4 hours</li>
+      </ul>
+
+      <!-- BIOMETRIC SECURITY -->
+      <h2 class="doc-h2" id="bio-sec">2. Biometric Security</h2>
+
+      <div class="callout callout-danger">
+        <strong>Critical:</strong> Biometric data is irreplaceable. Unlike passwords, a compromised biometric template cannot be "reset." Treat all biometric data with the highest classification level.
+      </div>
+
+      <h3 class="doc-h3">2.1 Storage &amp; Encryption</h3>
+      <ul>
+        <li>Biometric templates are encrypted with <strong>AES-256-GCM</strong> before storage</li>
+        <li>Encryption keys managed by the application's Key Management Service (KMS) — never in source code</li>
+        <li>Templates are stored in an isolated, access-controlled database schema (<code>biometric_vault</code>)</li>
+        <li>Only the BiometricAPI service account has read access to the vault schema</li>
+        <li>Template hashes (SHA-256) are stored in <code>biometric_log</code> for audit purposes — never the raw template</li>
+      </ul>
+
+      <h3 class="doc-h3">2.2 Transmission Security</h3>
+      <ul>
+        <li>Biometric data is <strong>never transmitted in plaintext</strong> at any point in the system</li>
+        <li>Device-to-server communication encrypted via TLS 1.3 mutual authentication (mTLS)</li>
+        <li>Device certificates are provisioned and rotated annually by the ICT department</li>
+        <li>Template data in transit is additionally encrypted with a session-specific key derived via ECDH</li>
+      </ul>
+
+      <h3 class="doc-h3">2.3 Liveness Detection</h3>
+      <ul>
+        <li>All facial recognition captures must pass ISO 30107-3 Presentation Attack Detection (PAD) Level 2</li>
+        <li>Fingerprint sensors detect fake fingers using electrical skin resistance measurement</li>
+        <li>Failed liveness checks are logged separately as <code>purpose: liveness_check_fail</code> in biometric_log</li>
+      </ul>
+
+      <h3 class="doc-h3">2.4 Template Lifecycle</h3>
+      <ul>
+        <li>Templates are automatically deleted when a user account is permanently deactivated</li>
+        <li>Users may request template deletion under NDPR Article 17 — process completes within 72 hours</li>
+        <li>Deletion is cryptographically verified (secure erase, not soft delete)</li>
+        <li>Annual audit confirms no orphaned templates exist (templates without corresponding active users)</li>
+      </ul>
+
+      <!-- DATA PROTECTION -->
+      <h2 class="doc-h2" id="data-protection">3. Data Protection</h2>
+
+      <h3 class="doc-h3">3.1 Data Classification</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Classification</th><th>Data Types</th><th>Controls</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-danger">Top Secret</span></td><td>Biometric templates, encryption keys, password hashes</td><td>AES-256 at rest, mTLS in transit, vault isolation, no export</td></tr>
+            <tr><td><span class="pill pill-warn">Confidential</span></td><td>Student results, CGPA, fee payment details, audit logs</td><td>HTTPS only, role-gated access, encrypted backups</td></tr>
+            <tr><td><span class="pill pill-should">Internal</span></td><td>Staff records, departmental data, course assignments</td><td>Authenticated access, RBAC, audit trail</td></tr>
+            <tr><td><span class="pill pill-ok">Public</span></td><td>Course catalogue, university calendar, public announcements</td><td>CDN delivery, read-only, no PII</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">3.2 Encryption at Rest</h3>
+      <ul>
+        <li>PostgreSQL data directory encrypted via LUKS (Linux Unified Key Setup) at OS level</li>
+        <li>S3/MinIO buckets use SSE-S3 (server-side encryption) for all stored files</li>
+        <li>Database backups encrypted with a separate backup KMS key before offsite transfer</li>
+        <li>Redis is configured with TLS and ACL authentication; no sensitive data written without encryption</li>
+      </ul>
+
+      <!-- NDPR COMPLIANCE -->
+      <h2 class="doc-h2" id="ndpr">4. NDPR Compliance</h2>
+
+      <div class="callout callout-info">
+        The Nigeria Data Protection Regulation (NDPR) 2019 requires any organisation processing the personal data of 1,000+ Nigerians annually to conduct a Data Protection Impact Assessment (DPIA) and appoint a Data Protection Officer (DPO).
+      </div>
+
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>NDPR Requirement</th><th>Implementation</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Lawful basis for processing</td><td>Contractual necessity (student registration agreement signed at admission)</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+            <tr><td>Data minimisation</td><td>Only fields required for academic operations are collected; no social media, political, or religious data</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+            <tr><td>Consent for biometric data</td><td>Explicit opt-in consent form signed during biometric enrollment; withdrawal process documented</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+            <tr><td>Right to access (Article 3.1)</td><td>Students can download their own data via the portal profile page</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+            <tr><td>Right to erasure (Article 17)</td><td>Data deletion request form; 72-hour SLA; biometric purge on account close</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+            <tr><td>Data retention policy</td><td>Academic records retained 7 years post-graduation; biometrics deleted on account close</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+            <tr><td>DPO appointment</td><td>University's Legal Officer designated as DPO; contact details published on portal</td><td><span class="pill pill-warn">In Progress</span></td></tr>
+            <tr><td>Breach notification (72h)</td><td>Incident response SLA of 4 hours to internal declaration; 72h to NITDA notification</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+            <tr><td>DPIA completion</td><td>DPIA conducted pre-launch with external privacy consultant</td><td><span class="pill pill-warn">Scheduled</span></td></tr>
+            <tr><td>Third-party processor agreements</td><td>DPA clauses in contracts with Remita, Flutterwave, Termii, AWS/Azure</td><td><span class="pill pill-ok">Compliant</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RBAC -->
+      <h2 class="doc-h2" id="rbac">5. Role-Based Access Control (RBAC)</h2>
+
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Permission</th><th>Student</th><th>Lecturer</th><th>Admin</th><th>VC</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>View own profile</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Edit own profile</td><td>Partial</td><td>Partial</td><td>✓</td><td>✓</td></tr>
+            <tr><td>View own results</td><td>✓</td><td>—</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Submit results</td><td>—</td><td>✓ (assigned)</td><td>—</td><td>—</td></tr>
+            <tr><td>Approve/publish results</td><td>—</td><td>—</td><td>✓</td><td>—</td></tr>
+            <tr><td>View all students' results</td><td>—</td><td>✓ (own courses)</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Record attendance</td><td>—</td><td>✓ (own courses)</td><td>✓</td><td>—</td></tr>
+            <tr><td>View own attendance</td><td>✓</td><td>—</td><td>✓</td><td>—</td></tr>
+            <tr><td>Pay fees</td><td>✓</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td>View fee reports</td><td>Own only</td><td>—</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Create/manage users</td><td>—</td><td>—</td><td>✓</td><td>—</td></tr>
+            <tr><td>Assign roles</td><td>—</td><td>—</td><td>✓ (below VC)</td><td>✓</td></tr>
+            <tr><td>View audit log</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+            <tr><td>View biometric log</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Enroll biometrics</td><td>—</td><td>—</td><td>✓</td><td>—</td></tr>
+            <tr><td>Delete biometric templates</td><td>—</td><td>—</td><td>✓</td><td>—</td></tr>
+            <tr><td>View executive dashboard</td><td>—</td><td>—</td><td>✓ (limited)</td><td>✓</td></tr>
+            <tr><td>Approve role promotions (Admin/VC)</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+            <tr><td>Manage academic calendar</td><td>—</td><td>—</td><td>✓</td><td>Approve</td></tr>
+            <tr><td>System configuration</td><td>—</td><td>—</td><td>✓</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- AUDIT & LOGGING -->
+      <h2 class="doc-h2" id="audit">6. Audit &amp; Logging</h2>
+
+      <h3 class="doc-h3">6.1 What Is Logged</h3>
+      <p>The audit_log table captures every state-changing event in the system:</p>
+      <ul>
+        <li>User authentication events: login, logout, failed login, password change</li>
+        <li>User management: account creation, role change, suspension, deletion</li>
+        <li>Result operations: submission, approval, rejection, amendment, publication</li>
+        <li>Biometric events: enrollment, verification, deletion (summary — full detail in biometric_log)</li>
+        <li>Payment events: payment initiated, gateway webhook received, reconciliation</li>
+        <li>Administrative actions: calendar changes, system config changes, bulk imports</li>
+        <li>Data exports: transcript downloads, report exports</li>
+      </ul>
+
+      <h3 class="doc-h3">6.2 Log Integrity</h3>
+      <ul>
+        <li>The audit_log table has <strong>no DELETE or UPDATE privileges</strong> granted to any application user</li>
+        <li>Each log entry includes a HMAC signature of its fields — detectable if records are tampered at DB level</li>
+        <li>Logs are also streamed in real-time to an external SIEM (Splunk or Elastic SIEM) for offsite copy</li>
+        <li>Log retention: <strong>7 years</strong> (in line with Nigerian academic record retention guidelines)</li>
+      </ul>
+
+      <!-- BACKUP STRATEGY -->
+      <h2 class="doc-h2" id="backup">7. Backup Strategy</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Backup Type</th><th>Frequency</th><th>Retention</th><th>Storage</th><th>Encryption</th></tr></thead>
+          <tbody>
+            <tr><td>Full database backup</td><td>Daily (02:00 WAT)</td><td>30 days</td><td>Primary: same region. Replica: Lagos / Frankfurt offsite</td><td>AES-256 (backup KMS key)</td></tr>
+            <tr><td>Incremental WAL backup</td><td>Every 5 minutes (pg_wal)</td><td>7 days</td><td>Same cloud region</td><td>AES-256</td></tr>
+            <tr><td>File storage backup</td><td>Daily (03:00 WAT)</td><td>90 days</td><td>Cross-region S3 replication</td><td>SSE-KMS</td></tr>
+            <tr><td>Redis snapshot</td><td>Every 30 minutes (RDB)</td><td>24 hours</td><td>Ephemeral (session data)</td><td>Volume-level</td></tr>
+            <tr><td>Configuration backup</td><td>On every deployment</td><td>Indefinite (git)</td><td>Private Git repository</td><td>Repo-level GPG</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Objective</th><th>Target</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Recovery Point Objective (RPO)</td><td>≤ 1 hour</td><td>Maximum data loss tolerable in a disaster scenario</td></tr>
+            <tr><td>Recovery Time Objective (RTO)</td><td>≤ 4 hours</td><td>Maximum downtime tolerable before service is restored</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Backup restoration is tested quarterly in an isolated environment. Test results are documented and available to the VC on request.</p>
+
+      <!-- INCIDENT RESPONSE -->
+      <h2 class="doc-h2" id="incident">8. Incident Response</h2>
+
+      <h3 class="doc-h3">8.1 Severity Levels</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Severity</th><th>Definition</th><th>Examples</th><th>Response SLA</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-danger">SEV-1 Critical</span></td><td>Complete service outage or confirmed data breach</td><td>Database compromise, ransomware, portal fully down</td><td>Acknowledge in 15 min; war room in 30 min</td></tr>
+            <tr><td><span class="pill pill-high">SEV-2 High</span></td><td>Significant degradation or security incident suspected</td><td>Authentication service down, biometric system offline, suspected intrusion</td><td>Acknowledge in 30 min; mitigation in 2h</td></tr>
+            <tr><td><span class="pill pill-med">SEV-3 Medium</span></td><td>Partial functionality affected; no data loss</td><td>Payment gateway unreachable, PDF export failing, slow performance</td><td>Acknowledge in 1h; fix in 8h</td></tr>
+            <tr><td><span class="pill pill-low">SEV-4 Low</span></td><td>Minor issue, workaround available</td><td>UI glitch, single user locked out, non-critical error</td><td>Acknowledge in 4h; fix in 2 business days</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">8.2 Escalation Matrix</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Severity</th><th>Primary Contact</th><th>Escalation 1 (if unresolved)</th><th>Escalation 2</th><th>External Notification</th></tr></thead>
+          <tbody>
+            <tr><td>SEV-1</td><td>DevOps Engineer (on-call)</td><td>ICT Director (30 min)</td><td>Vice Chancellor (1 hour)</td><td>NITDA within 72h if data breach confirmed</td></tr>
+            <tr><td>SEV-2</td><td>DevOps Engineer</td><td>ICT Director (2 hours)</td><td>—</td><td>If breach suspected, escalate to SEV-1</td></tr>
+            <tr><td>SEV-3</td><td>Dev Team Lead</td><td>ICT Director (8 hours)</td><td>—</td><td>None</td></tr>
+            <tr><td>SEV-4</td><td>Support Team</td><td>Dev Team Lead (2 days)</td><td>—</td><td>None</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

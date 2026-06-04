@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+  <style>
+    .arch-layer { border: 2px solid var(--border,#E2E4E8); border-radius:10px; padding:1.5rem; margin-bottom:1.25rem; }
+    .arch-layer-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--navy,#0A1628); margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:2px solid var(--gold,#C9A84C); display:flex; align-items:center; gap:0.5rem; }
+    .arch-boxes { display:flex; flex-wrap:wrap; gap:0.75rem; }
+    .arch-box { background:var(--cream,#FAFAF7); border:1.5px solid var(--border,#E2E4E8); border-radius:8px; padding:0.75rem 1rem; font-size:0.8rem; font-weight:600; color:var(--navy,#0A1628); min-width:140px; text-align:center; position:relative; }
+    .arch-box.primary { background:var(--navy,#0A1628); color:#fff; border-color:var(--navy,#0A1628); }
+    .arch-box.accent { background:var(--gold,#C9A84C); color:var(--navy,#0A1628); border-color:var(--gold,#C9A84C); }
+    .arch-box .arch-sub { font-weight:400; font-size:0.72rem; opacity:0.8; margin-top:0.25rem; }
+    .arch-connector { text-align:center; color:var(--muted,#8A95A3); font-size:1.5rem; margin:0.25rem 0; }
+    .layer-client { border-color:#1A5F9E; }
+    .layer-client .arch-layer-title { color:#1A5F9E; border-color:#1A5F9E; }
+    .layer-app { border-color:var(--navy,#0A1628); }
+    .layer-data { border-color:#1A7F5A; }
+    .layer-data .arch-layer-title { color:#1A7F5A; border-color:#1A7F5A; }
+    .layer-bio { border-color:var(--gold,#C9A84C); }
+    .layer-bio .arch-layer-title { color:#8a6a1a; border-color:var(--gold,#C9A84C); }
+    .layer-third { border-color:#8A95A3; }
+    .layer-infra { border-color:#3D4F6B; }
+    .layer-infra .arch-layer-title { color:#3D4F6B; border-color:#3D4F6B; }
+  </style>
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">System Architecture</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#client">Client Layer</a></li>
+        <li><a href="#application">Application Layer</a></li>
+        <li><a href="#data">Data Layer</a></li>
+        <li><a href="#biometric">Biometric Layer</a></li>
+        <li><a href="#third-party">Third-Party Services</a></li>
+        <li><a href="#infrastructure">Infrastructure</a></li>
+        <li><a href="#tech-stack">Technology Stack</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">System Architecture</h1>
+      <p class="doc-lead">A layered architecture diagram and full technology stack for the UNIUTY Portal, showing how clients, application services, data stores, biometric hardware, and third-party integrations interact.</p>
+
+      <div class="callout callout-info">
+        <strong>Pattern:</strong> Layered MVC + Service-Oriented &nbsp;|&nbsp; <strong>Protocol:</strong> HTTPS / REST &nbsp;|&nbsp; <strong>Auth:</strong> JWT (HS256) &nbsp;|&nbsp; <strong>Deployment:</strong> Containerised (Docker + Kubernetes)
+      </div>
+
+      <!-- OVERVIEW -->
+      <h2 class="doc-h2" id="overview">1. Architecture Overview</h2>
+      <p>The UNIUTY Portal is structured as a <strong>six-layer system</strong>. Clients interact with the application through a secure HTTPS boundary. The application layer hosts all business logic, with a dedicated BiometricAPI plugin interface decoupling hardware from core logic. Persistence is handled by PostgreSQL as the primary datastore, with Redis for sessions and caching. All external dependencies (payment gateways, email, SMS) are isolated behind service adapters to allow future substitution.</p>
+
+      <!-- FULL ARCHITECTURE DIAGRAM -->
+      <h2 class="doc-h2" id="client">2. Client Layer</h2>
+      <div class="arch-layer layer-client">
+        <div class="arch-layer-title">
+          <svg width="16" height="16" fill="none" stroke="#1A5F9E" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Client Layer — User-Facing Interfaces
+        </div>
+        <div class="arch-boxes">
+          <div class="arch-box">
+            Web Browser (PC/Tablet)
+            <div class="arch-sub">Chrome, Firefox, Edge, Safari</div>
+          </div>
+          <div class="arch-box">
+            Mobile Browser
+            <div class="arch-sub">Android Chrome, iOS Safari (PWA)</div>
+          </div>
+          <div class="arch-box accent">
+            Biometric Hardware Terminal
+            <div class="arch-sub">Suprema / ZKTeco / Custom</div>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem; font-size:0.8rem; color:var(--muted,#8A95A3);">
+          All clients communicate over TLS 1.3 (HTTPS). Biometric terminals connect to the application layer via the BiometricAPI USB/IP bridge. No native app is required — the portal is a responsive web application delivered as a Progressive Web App (PWA).
+        </div>
+      </div>
+
+      <div class="arch-connector">↕ HTTPS / TLS 1.3</div>
+
+      <!-- APPLICATION LAYER -->
+      <h2 class="doc-h2" id="application">3. Application Layer</h2>
+      <div class="arch-layer layer-app">
+        <div class="arch-layer-title">
+          <svg width="16" height="16" fill="none" stroke="#0A1628" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+          Application Layer — Core Business Services
+        </div>
+        <div class="arch-boxes">
+          <div class="arch-box primary">
+            REST API Server
+            <div class="arch-sub">Node.js 20 + Express 5</div>
+          </div>
+          <div class="arch-box primary">
+            Auth Service
+            <div class="arch-sub">JWT + bcrypt + refresh tokens</div>
+          </div>
+          <div class="arch-box primary">
+            Results Service
+            <div class="arch-sub">Score validation, grade calc, PDF export</div>
+          </div>
+          <div class="arch-box primary">
+            Attendance Service
+            <div class="arch-sub">Session management, % tracking</div>
+          </div>
+          <div class="arch-box primary">
+            Fees &amp; Payment Service
+            <div class="arch-sub">Invoice, reconciliation, gateway adapter</div>
+          </div>
+          <div class="arch-box accent">
+            BiometricAPI Plugin Interface
+            <div class="arch-sub">Hardware abstraction layer</div>
+          </div>
+          <div class="arch-box">
+            Notification Service
+            <div class="arch-sub">Email (SMTP) + SMS (Termii)</div>
+          </div>
+          <div class="arch-box">
+            Audit Service
+            <div class="arch-sub">Append-only event logging</div>
+          </div>
+          <div class="arch-box">
+            Static File Server / CDN
+            <div class="arch-sub">HTML, CSS, JS assets via CDN edge</div>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem; font-size:0.8rem; color:var(--muted,#8A95A3);">
+          All REST endpoints are protected by JWT middleware. Role-based access control (RBAC) is enforced at the route level. The BiometricAPI interface communicates with hardware drivers via a defined plugin contract — swapping hardware vendors requires only a driver update, not an API change.
+        </div>
+      </div>
+
+      <div class="arch-connector">↕ TCP / SQL / Redis Protocol</div>
+
+      <!-- DATA LAYER -->
+      <h2 class="doc-h2" id="data">4. Data Layer</h2>
+      <div class="arch-layer layer-data">
+        <div class="arch-layer-title">
+          <svg width="16" height="16" fill="none" stroke="#1A7F5A" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+          Data Layer — Persistence &amp; Caching
+        </div>
+        <div class="arch-boxes">
+          <div class="arch-box">
+            PostgreSQL 16 (Primary)
+            <div class="arch-sub">All relational data; 14 core tables</div>
+          </div>
+          <div class="arch-box">
+            PostgreSQL Replica
+            <div class="arch-sub">Read replica for reports / analytics</div>
+          </div>
+          <div class="arch-box">
+            Redis 7 (Sessions/Cache)
+            <div class="arch-sub">JWT denylist, session store, rate limits</div>
+          </div>
+          <div class="arch-box">
+            File Storage (S3-compatible)
+            <div class="arch-sub">Result PDFs, transcripts, profile photos</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-connector">↕ USB/IP / Serial / BLE</div>
+
+      <!-- BIOMETRIC LAYER -->
+      <h2 class="doc-h2" id="biometric">5. Biometric Hardware Layer</h2>
+      <div class="arch-layer layer-bio">
+        <div class="arch-layer-title">
+          <svg width="16" height="16" fill="none" stroke="#8a6a1a" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4l3 3"/></svg>
+          Biometric Hardware Layer — Physical Devices
+        </div>
+        <div class="arch-boxes">
+          <div class="arch-box accent">
+            Fingerprint Scanner
+            <div class="arch-sub">500 dpi optical / capacitive sensor</div>
+          </div>
+          <div class="arch-box accent">
+            Retina Scanner
+            <div class="arch-sub">Near-infrared iris capture</div>
+          </div>
+          <div class="arch-box accent">
+            Facial Recognition Camera
+            <div class="arch-sub">3D depth sensing, liveness detection</div>
+          </div>
+          <div class="arch-box accent">
+            NFC Reader
+            <div class="arch-sub">ISO 14443 / 15693 compliant</div>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem; font-size:0.8rem; color:var(--muted,#8A95A3);">
+          Hardware communicates with the BiometricAPI Plugin Interface via USB or TCP/IP (for networked terminals). The BiometricAPI abstracts all hardware-specific SDKs behind a common interface. Biometric templates are encrypted (AES-256) before transit to the application layer and are never stored in plaintext.
+        </div>
+      </div>
+
+      <div class="arch-connector">↕ HTTPS API / SMTP / Webhook</div>
+
+      <!-- THIRD PARTY -->
+      <h2 class="doc-h2" id="third-party">6. Third-Party Services</h2>
+      <div class="arch-layer layer-third">
+        <div class="arch-layer-title">
+          <svg width="16" height="16" fill="none" stroke="#3D4F6B" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Third-Party Service Integrations
+        </div>
+        <div class="arch-boxes">
+          <div class="arch-box">
+            Remita Payment
+            <div class="arch-sub">Primary fee payment gateway (NGA)</div>
+          </div>
+          <div class="arch-box">
+            Flutterwave
+            <div class="arch-sub">Fallback payment gateway</div>
+          </div>
+          <div class="arch-box">
+            SMTP Server (Zoho/SES)
+            <div class="arch-sub">Transactional emails</div>
+          </div>
+          <div class="arch-box">
+            Termii SMS Gateway
+            <div class="arch-sub">OTP and notification SMS</div>
+          </div>
+          <div class="arch-box">
+            Google Fonts CDN
+            <div class="arch-sub">DM Sans + Playfair Display typefaces</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFRASTRUCTURE -->
+      <h2 class="doc-h2" id="infrastructure">7. Infrastructure</h2>
+      <div class="arch-layer layer-infra">
+        <div class="arch-layer-title">
+          <svg width="16" height="16" fill="none" stroke="#3D4F6B" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          Infrastructure — Hosting &amp; Networking
+        </div>
+        <div class="arch-boxes">
+          <div class="arch-box">
+            Load Balancer (Nginx)
+            <div class="arch-sub">SSL termination, upstream routing</div>
+          </div>
+          <div class="arch-box">
+            Docker Containers
+            <div class="arch-sub">App, DB, Redis, Worker containers</div>
+          </div>
+          <div class="arch-box">
+            Kubernetes Cluster
+            <div class="arch-sub">Orchestration, auto-scaling, rolling deploys</div>
+          </div>
+          <div class="arch-box">
+            CDN Edge (Cloudflare)
+            <div class="arch-sub">Static assets, DDoS protection, WAF</div>
+          </div>
+          <div class="arch-box">
+            GitHub Actions CI/CD
+            <div class="arch-sub">Automated build, test, deploy pipeline</div>
+          </div>
+          <div class="arch-box">
+            UptimeRobot + Sentry
+            <div class="arch-sub">Uptime monitoring + error tracking</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TECH STACK -->
+      <h2 class="doc-h2" id="tech-stack">8. Technology Stack</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Frontend</td><td>HTML5 / CSS3 / Vanilla JS</td><td>—</td><td>Portal UI (no framework dependency; intentional)</td></tr>
+            <tr><td>Frontend</td><td>DM Sans + Playfair Display</td><td>Google Fonts</td><td>Brand typography</td></tr>
+            <tr><td>Backend</td><td>Node.js</td><td>v20 LTS</td><td>Runtime environment</td></tr>
+            <tr><td>Backend</td><td>Express.js</td><td>v5</td><td>HTTP framework and routing</td></tr>
+            <tr><td>Backend</td><td>Knex.js / Prisma</td><td>Latest stable</td><td>SQL query builder / ORM</td></tr>
+            <tr><td>Auth</td><td>jsonwebtoken</td><td>v9</td><td>JWT generation and verification</td></tr>
+            <tr><td>Auth</td><td>bcrypt</td><td>v5</td><td>Password hashing (cost factor 12)</td></tr>
+            <tr><td>Database</td><td>PostgreSQL</td><td>v16</td><td>Primary relational datastore</td></tr>
+            <tr><td>Cache</td><td>Redis</td><td>v7</td><td>Session store, rate limiting, caching</td></tr>
+            <tr><td>File Storage</td><td>AWS S3 / MinIO (self-hosted)</td><td>—</td><td>Document and media storage</td></tr>
+            <tr><td>PDF</td><td>Puppeteer / pdfkit</td><td>Latest</td><td>Result transcript and receipt PDF generation</td></tr>
+            <tr><td>Email</td><td>Nodemailer + SES/Zoho</td><td>—</td><td>Transactional email delivery</td></tr>
+            <tr><td>SMS</td><td>Termii API</td><td>v3</td><td>OTP and notification SMS</td></tr>
+            <tr><td>Payments</td><td>Remita SDK + Flutterwave SDK</td><td>—</td><td>Fee collection and reconciliation</td></tr>
+            <tr><td>Biometric</td><td>BiometricAPI (custom plugin interface)</td><td>v1</td><td>Hardware abstraction layer</td></tr>
+            <tr><td>Container</td><td>Docker + Docker Compose</td><td>Latest</td><td>Containerisation for all services</td></tr>
+            <tr><td>Orchestration</td><td>Kubernetes (K3s / EKS / AKS)</td><td>—</td><td>Production container orchestration</td></tr>
+            <tr><td>CI/CD</td><td>GitHub Actions</td><td>—</td><td>Automated pipeline</td></tr>
+            <tr><td>CDN / WAF</td><td>Cloudflare</td><td>—</td><td>Edge caching and DDoS protection</td></tr>
+            <tr><td>Monitoring</td><td>UptimeRobot + New Relic + Sentry</td><td>—</td><td>Uptime, APM, error tracking</td></tr>
+            <tr><td>Logging</td><td>Winston + CloudWatch / Loki</td><td>—</td><td>Application and infrastructure logs</td></tr>
+            <tr><td>Testing</td><td>Jest + Supertest + Playwright</td><td>—</td><td>Unit, integration, and E2E testing</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

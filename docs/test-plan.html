@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Plan — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">Test Plan</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#objectives">Objectives</a></li>
+        <li><a href="#scope">Scope</a></li>
+        <li><a href="#test-types">Test Types</a></li>
+        <li><a href="#environment">Test Environment</a></li>
+        <li><a href="#test-cases">Test Cases</a></li>
+        <li><a href="#uat">UAT Plan</a></li>
+        <li><a href="#defects">Defect Management</a></li>
+        <li><a href="#sign-off">Sign-off Criteria</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">Test Plan</h1>
+      <p class="doc-lead">Comprehensive test strategy for the UNIUTY Portal covering all test types, environments, test cases, UAT procedure, and release sign-off requirements.</p>
+
+      <!-- OBJECTIVES -->
+      <h2 class="doc-h2" id="objectives">1. Objectives</h2>
+      <ul>
+        <li>Verify that all features meet their acceptance criteria as documented in <a href="acceptance-criteria.html">acceptance-criteria.html</a></li>
+        <li>Ensure the system is secure against common web vulnerabilities (OWASP Top 10)</li>
+        <li>Validate that the system performs under the expected load of 15,000 concurrent users</li>
+        <li>Confirm that biometric integrations function correctly with real hardware</li>
+        <li>Ensure NDPR compliance controls are in place and auditable</li>
+        <li>Obtain sign-off from representative stakeholders in all four user roles before go-live</li>
+      </ul>
+
+      <!-- SCOPE -->
+      <h2 class="doc-h2" id="scope">2. Scope</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>In Scope</th><th>Out of Scope</th></tr></thead>
+          <tbody>
+            <tr><td>All REST API endpoints</td><td>University ERP (SAGE) integration (Phase 4)</td></tr>
+            <tr><td>Role-based access for all 4 roles</td><td>Native iOS/Android mobile apps (Phase 4)</td></tr>
+            <tr><td>Biometric enrollment and verification</td><td>Library (Koha) system integration</td></tr>
+            <tr><td>Result submission, approval, publication</td><td>AI/ML fraud detection model (Phase 4)</td></tr>
+            <tr><td>Fee payment (Remita + Flutterwave)</td><td>Multi-campus tenant isolation (Phase 4)</td></tr>
+            <tr><td>Attendance recording</td><td>Third-party LMS integration</td></tr>
+            <tr><td>PDF export (transcripts, receipts, reports)</td><td>—</td></tr>
+            <tr><td>Email and SMS notifications</td><td>—</td></tr>
+            <tr><td>Audit log integrity</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TEST TYPES -->
+      <h2 class="doc-h2" id="test-types">3. Test Types</h2>
+
+      <h3 class="doc-h3">3.1 Unit Tests</h3>
+      <p><strong>Tool:</strong> Jest | <strong>Coverage Target:</strong> ≥ 80% per module | <strong>Runner:</strong> GitHub Actions on every PR</p>
+      <ul>
+        <li><strong>Grade Calculation:</strong> gradeCalc(ca, exam) → { total, grade } — all boundary conditions (0, 30, 70, 100, fractions)</li>
+        <li><strong>CGPA Calculation:</strong> calcCGPA(results[]) — weighted average over multiple semesters</li>
+        <li><strong>Password Validation:</strong> validatePassword() — rejects weak; accepts strong; checks HIBP list</li>
+        <li><strong>Role Detection:</strong> hasPermission(role, action) — all 4 roles × all 20 permissions</li>
+        <li><strong>JWT Utilities:</strong> signToken(), verifyToken(), isTokenDenylisted() — expiry, tamper, blacklist</li>
+        <li><strong>Matric Number Generator:</strong> generateMatric(year, dept, seq) → correct format</li>
+        <li><strong>Fee Balance Calculator:</strong> calcBalance(total_amount, payments[]) → correct balance</li>
+        <li><strong>Attendance Percentage:</strong> calcAttendancePct(sessions_held, sessions_attended) → correct percentage</li>
+      </ul>
+
+      <h3 class="doc-h3">3.2 Integration Tests</h3>
+      <p><strong>Tool:</strong> Jest + Supertest | <strong>Scope:</strong> API endpoint contracts with real DB (test schema)</p>
+      <ul>
+        <li><strong>Login flow:</strong> POST /auth/login → JWT returned; POST /auth/refresh → new token; POST /auth/logout → token denied</li>
+        <li><strong>Result submission with biometric:</strong> POST /results (with valid bio_token) → batch created; POST /results (without bio_token) → 401</li>
+        <li><strong>Fee payment webhook flow:</strong> POST /payments → checkout_url returned; simulate Remita webhook → fee balance updated; GET /fees/:id → balance = 0</li>
+        <li><strong>Biometric enrollment → verify → delete cycle</strong></li>
+        <li><strong>User creation and role change with audit log verification</strong></li>
+        <li><strong>Account lockout after 5 failed logins</strong></li>
+      </ul>
+
+      <h3 class="doc-h3">3.3 End-to-End (E2E) Tests</h3>
+      <p><strong>Tool:</strong> Playwright | <strong>Environments:</strong> Staging (pre-production data) | <strong>Runs:</strong> Nightly + before every release</p>
+      <ul>
+        <li><strong>Student Journey:</strong> Login → view results → download transcript (no balance) → pay fees → transcript unlocked</li>
+        <li><strong>Lecturer Journey:</strong> Login → navigate to course → enter scores → save draft → submit with biometric → receive admin feedback → correct and resubmit</li>
+        <li><strong>Admin Journey:</strong> Login → create user → assign to department → approve result batch → publish → verify student notification received</li>
+        <li><strong>VC Journey:</strong> Login → view executive dashboard → drill into department → view audit log → approve role promotion</li>
+        <li><strong>Password Recovery:</strong> Visit forgot-password → enter email → receive OTP → reset password → login with new password</li>
+      </ul>
+
+      <h3 class="doc-h3">3.4 Performance Tests</h3>
+      <p><strong>Tool:</strong> k6 | <strong>Environment:</strong> Staging with production-size dataset (seeded)</p>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Scenario</th><th>Load</th><th>Pass Criterion</th></tr></thead>
+          <tbody>
+            <tr><td>Concurrent logins (result day surge)</td><td>15,000 VUs ramping over 5 minutes</td><td>P95 response &lt; 2s; error rate &lt; 0.1%</td></tr>
+            <tr><td>Student result page load</td><td>5,000 concurrent GETs</td><td>P95 &lt; 1.5s; DB query &lt; 100ms</td></tr>
+            <tr><td>Biometric scan verification</td><td>500 concurrent scan requests</td><td>P95 &lt; 3s; P99 &lt; 5s</td></tr>
+            <tr><td>Fee payment initiation</td><td>1,000 concurrent payment initiations</td><td>P95 &lt; 2s; no duplicate payment records</td></tr>
+            <tr><td>Admin user list (10,000 users)</td><td>50 concurrent admin requests</td><td>P95 &lt; 1s with pagination</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">3.5 Security Tests</h3>
+      <p><strong>Tools:</strong> OWASP ZAP (automated), Manual pen test (contracted firm), Burp Suite</p>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Test</th><th>Method</th><th>Pass Criterion</th></tr></thead>
+          <tbody>
+            <tr><td>SQL Injection</td><td>OWASP ZAP scan + manual payloads on all input fields</td><td>No injectable parameters found; all queries parameterised</td></tr>
+            <tr><td>XSS (Reflected + Stored)</td><td>ZAP active scan + Playwright XSS payloads</td><td>No XSS vectors found; CSP headers enforced</td></tr>
+            <tr><td>CSRF</td><td>Test state-changing requests without CSRF token</td><td>All mutations require valid CSRF token or JWT; SameSite=Strict cookies</td></tr>
+            <tr><td>Brute Force Lockout</td><td>Automated login attempt script (&gt; 5 attempts)</td><td>Account locked at attempt 5; rate limiter triggers at attempt 3</td></tr>
+            <tr><td>JWT Tampering</td><td>Modify JWT payload (role claim) and resend</td><td>API returns 401 for tampered tokens; signature verification enforced</td></tr>
+            <tr><td>Broken Object Level Auth (BOLA)</td><td>Access another user's resources by changing ID in URL</td><td>403 returned for all cross-user resource access attempts</td></tr>
+            <tr><td>Insecure Direct Object Reference</td><td>Enumerate sequential IDs in API paths</td><td>UUIDs used throughout; no sequential IDs exposed</td></tr>
+            <tr><td>Mass Assignment</td><td>POST extra fields (e.g. role, cgpa) in user creation</td><td>Only whitelisted fields accepted; extra fields silently ignored</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TEST ENVIRONMENT -->
+      <h2 class="doc-h2" id="environment">4. Test Environment</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Environment</th><th>URL</th><th>Database</th><th>Biometric</th><th>Payments</th></tr></thead>
+          <tbody>
+            <tr><td>Development</td><td>localhost:3000</td><td>Local PostgreSQL (Docker)</td><td>Simulated (mock)</td><td>Sandbox (test keys)</td></tr>
+            <tr><td>Staging</td><td>staging.uniuty.edu.ng</td><td>PostgreSQL (seeded with 1,000 test records)</td><td>Real hardware (1 terminal)</td><td>Sandbox gateways</td></tr>
+            <tr><td>Production</td><td>portal.uniuty.edu.ng</td><td>PostgreSQL (live)</td><td>All campus terminals</td><td>Live gateways</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TEST CASES -->
+      <h2 class="doc-h2" id="test-cases">5. Test Cases</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>TC-ID</th><th>Description</th><th>Precondition</th><th>Steps</th><th>Expected Result</th><th>Priority</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tc-id">TC-001</td>
+              <td class="tc-title">Login — Valid credentials</td>
+              <td>User exists, account active</td>
+              <td>POST /auth/login with valid portal_id + password</td>
+              <td>HTTP 200, JWT returned, refresh cookie set</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-ok">Pass</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-002</td>
+              <td class="tc-title">Login — Invalid password</td>
+              <td>User exists, account active</td>
+              <td>POST /auth/login with wrong password</td>
+              <td>HTTP 401, failed_attempts += 1</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-ok">Pass</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-003</td>
+              <td class="tc-title">Account lockout at 5 failures</td>
+              <td>4 failed attempts already recorded</td>
+              <td>POST /auth/login with wrong password</td>
+              <td>HTTP 401, account locked, email sent</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-ok">Pass</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-004</td>
+              <td class="tc-title">JWT access on protected route</td>
+              <td>Valid JWT in header</td>
+              <td>GET /api/users/:id with valid Bearer token</td>
+              <td>HTTP 200, user data returned</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-ok">Pass</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-005</td>
+              <td class="tc-title">Expired JWT rejected</td>
+              <td>JWT with past exp claim</td>
+              <td>GET any protected endpoint</td>
+              <td>HTTP 401, TOKEN_EXPIRED</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-ok">Pass</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-006</td>
+              <td class="tc-title">Lecturer submits results</td>
+              <td>Lecturer assigned to course, window open</td>
+              <td>POST /api/results with valid bio_token and scores</td>
+              <td>HTTP 201, batch status = pending, admin notified</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-007</td>
+              <td class="tc-title">Score exceeds CA max (30)</td>
+              <td>Result entry form open</td>
+              <td>Submit ca_score = 35</td>
+              <td>HTTP 422, validation error, no record created</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-008</td>
+              <td class="tc-title">Admin approves result batch</td>
+              <td>Batch in pending status</td>
+              <td>PUT /api/results/:id with action = approve</td>
+              <td>Results published; students notified</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-009</td>
+              <td class="tc-title">Student views published result</td>
+              <td>Results published for student's course</td>
+              <td>GET /api/results/:studentId</td>
+              <td>HTTP 200, result data with grades visible</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-010</td>
+              <td class="tc-title">Transcript blocked for indebted student</td>
+              <td>Student has balance &gt; 0</td>
+              <td>GET /api/results/export?student_id=...</td>
+              <td>HTTP 403, download blocked</td>
+              <td><span class="pill pill-should">P2</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-011</td>
+              <td class="tc-title">Biometric enrollment success</td>
+              <td>Admin authenticated, terminal online, 3 samples ready</td>
+              <td>POST /api/biometric/enroll with 3 quality samples</td>
+              <td>HTTP 201, template created, bio_log written</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-012</td>
+              <td class="tc-title">Biometric verification match</td>
+              <td>User enrolled, finger presented correctly</td>
+              <td>POST /api/biometric/scan with correct user_id</td>
+              <td>HTTP 200, result = VERIFIED, bio_token returned within 3s</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-013</td>
+              <td class="tc-title">Fee payment — successful webhook</td>
+              <td>Student has outstanding balance, Remita sandbox</td>
+              <td>POST /api/payments → complete Remita flow → webhook fires</td>
+              <td>Balance = 0, payment record created, PDF receipt emailed</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-014</td>
+              <td class="tc-title">SQL injection on login</td>
+              <td>Public login endpoint</td>
+              <td>Submit portal_id = "' OR '1'='1"</td>
+              <td>HTTP 401, no data leak, query parameterised</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-015</td>
+              <td class="tc-title">XSS in result notes field</td>
+              <td>Admin rejection form</td>
+              <td>Enter &lt;script&gt;alert(1)&lt;/script&gt; in notes field</td>
+              <td>Script is escaped; no alert fires; stored safely</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-016</td>
+              <td class="tc-title">BOLA: Student access another's results</td>
+              <td>Authenticated as Student A</td>
+              <td>GET /api/results/:studentIdOfStudentB</td>
+              <td>HTTP 403, data not returned</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-017</td>
+              <td class="tc-title">Performance: 15,000 concurrent logins</td>
+              <td>Staging with production-size DB, k6 ready</td>
+              <td>Run k6 script with 15,000 VUs ramp-up</td>
+              <td>P95 &lt; 2s, error rate &lt; 0.1%</td>
+              <td><span class="pill pill-should">P2</span></td>
+              <td><span class="pill pill-low">Not Run</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-018</td>
+              <td class="tc-title">Biometric scan &lt; 3s under load</td>
+              <td>500 concurrent scan requests (k6)</td>
+              <td>POST /api/biometric/scan × 500 VUs</td>
+              <td>P95 &lt; 3s, P99 &lt; 5s</td>
+              <td><span class="pill pill-should">P2</span></td>
+              <td><span class="pill pill-low">Not Run</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-019</td>
+              <td class="tc-title">Attendance percentage warning display</td>
+              <td>Student has 66% attendance in course</td>
+              <td>Login as student, view attendance</td>
+              <td>Red warning banner displayed; percentage shown as 66.7%</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="tc-id">TC-020</td>
+              <td class="tc-title">Audit log immutability</td>
+              <td>Admin authenticated, audit log has entries</td>
+              <td>Attempt DELETE via API and direct SQL</td>
+              <td>Both operations rejected; security alert triggered</td>
+              <td><span class="pill pill-must">P1</span></td>
+              <td><span class="pill pill-warn">Pending</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- UAT PLAN -->
+      <h2 class="doc-h2" id="uat">6. UAT Plan</h2>
+      <p>User Acceptance Testing will be conducted in Week 17–18 in a controlled staging environment with real user data (anonymised). Three sign-off groups are required:</p>
+
+      <h3 class="doc-h3">6.1 UAT Groups</h3>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Group</th><th>Participants</th><th>Focus Areas</th><th>Session Duration</th></tr></thead>
+          <tbody>
+            <tr><td>Student Representatives</td><td>10 students (2 per faculty)</td><td>Results view, fee payment, attendance, transcript download</td><td>2 hours</td></tr>
+            <tr><td>Lecturer Representatives</td><td>5 lecturers (1 per faculty + 1 HOD)</td><td>Result entry, attendance recording, class list, report export</td><td>3 hours</td></tr>
+            <tr><td>Admin Representatives</td><td>3 registry staff, 2 bursary staff</td><td>User management, result approval, fee reconciliation, audit log</td><td>4 hours</td></tr>
+            <tr><td>VC Office</td><td>VC + 1 Deputy VC</td><td>Executive dashboard, department drilldown, role approval</td><td>1.5 hours</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="doc-h3">6.2 UAT Sign-off Checklist</h3>
+      <ul>
+        <li>All critical user journeys completed without system error by each group</li>
+        <li>No P1 or P2 defects outstanding at time of sign-off</li>
+        <li>Each group lead signs the UAT Acceptance Form</li>
+        <li>Feedback collected and triaged — cosmetic issues documented as P4 (post-launch backlog)</li>
+      </ul>
+
+      <!-- DEFECT MANAGEMENT -->
+      <h2 class="doc-h2" id="defects">7. Defect Management</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Priority</th><th>Definition</th><th>Fix SLA</th><th>Blocks Release?</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-danger">P1 — Critical</span></td><td>Data loss, security breach, complete feature failure</td><td>Same day</td><td>Yes — release blocked</td></tr>
+            <tr><td><span class="pill pill-high">P2 — High</span></td><td>Major feature broken, significant data error, no workaround</td><td>2 business days</td><td>Yes — release blocked</td></tr>
+            <tr><td><span class="pill pill-med">P3 — Medium</span></td><td>Feature degraded, workaround available</td><td>1 sprint (2 weeks)</td><td>No — can release</td></tr>
+            <tr><td><span class="pill pill-low">P4 — Low</span></td><td>Cosmetic, minor UX issue, typo</td><td>Next maintenance window</td><td>No</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SIGN-OFF CRITERIA -->
+      <h2 class="doc-h2" id="sign-off">8. Release Sign-off Criteria</h2>
+      <p>Production release is approved only when ALL of the following are satisfied:</p>
+      <div class="callout callout-warn">
+        <strong>Go / No-Go Decision Gate:</strong> This checklist must be reviewed by the Project Manager, ICT Director, QA Lead, and VC Representative in a Release Readiness meeting before deployment is authorised.
+      </div>
+      <ul>
+        <li>All P1 and P2 defects are resolved and re-tested as PASS</li>
+        <li>All test types have been executed: Unit, Integration, E2E, Performance, Security</li>
+        <li>Performance test passes: P95 load time &lt; 2s at 15,000 concurrent users</li>
+        <li>Security pen test completed; all Critical and High findings remediated</li>
+        <li>UAT sign-off forms received from all four stakeholder groups</li>
+        <li>Data migration completed and verified: record count, sample spot checks</li>
+        <li>Biometric enrollment ≥ 90% of active users (minimum pre-launch)</li>
+        <li>Backup and recovery test passed: data restored from backup within RTO</li>
+        <li>Monitoring dashboards live and alerting tested (UptimeRobot, Sentry, New Relic)</li>
+        <li>NDPR DPIA reviewed and signed by DPO</li>
+        <li>Rollback procedure documented and rehearsed</li>
+        <li>Staff training completed for all Admin and Lecturer users</li>
+      </ul>
+
+    </main>
+  </div>
+</body>
+</html>

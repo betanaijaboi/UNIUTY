@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceptance Criteria — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">Acceptance Criteria</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#how-to-read">How to Read</a></li>
+        <li><a href="#auth">Authentication</a></li>
+        <li><a href="#biometric">Biometric System</a></li>
+        <li><a href="#admin">Admin Module</a></li>
+        <li><a href="#lecturer">Lecturer Module</a></li>
+        <li><a href="#student">Student Module</a></li>
+        <li><a href="#dod">Definition of Done</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">Acceptance Criteria</h1>
+      <p class="doc-lead">Testable, unambiguous acceptance criteria for every major feature of the UNIUTY Portal, written in Gherkin (Given/When/Then) format for direct use in test case creation.</p>
+
+      <!-- HOW TO READ -->
+      <h2 class="doc-h2" id="how-to-read">1. How to Read These Criteria</h2>
+      <div class="callout callout-info">
+        <strong>Format:</strong> Each criterion has a unique ID (e.g. <code>AC-AUTH-01</code>), a feature description, and one or more Gherkin scenarios. A feature is considered <strong>done</strong> when all its Gherkin scenarios pass in the staging environment AND are reviewed by the QA lead.
+      </div>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Prefix</th><th>Module</th></tr></thead>
+          <tbody>
+            <tr><td>AC-AUTH</td><td>Authentication &amp; Session Management</td></tr>
+            <tr><td>AC-BIO</td><td>Biometric System</td></tr>
+            <tr><td>AC-ADMIN</td><td>Administrator Module</td></tr>
+            <tr><td>AC-LEC</td><td>Lecturer Module</td></tr>
+            <tr><td>AC-STU</td><td>Student Module</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- AUTHENTICATION -->
+      <h2 class="doc-h2" id="auth">2. Authentication</h2>
+
+      <div class="test-case">
+        <div class="tc-id">AC-AUTH-01</div>
+        <div class="tc-title">Successful Login with Valid Credentials</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a user with portal_id <span class="val">"STU-2024-001"</span> and a valid password exists in the system<br/>
+          <span class="kw">When</span> the user submits portal_id <span class="val">"STU-2024-001"</span> and the correct password<br/>
+          <span class="kw">Then</span> the API returns HTTP <span class="val">200</span><br/>
+          <span class="kw">And</span> the response contains a valid JWT <span class="val">access_token</span><br/>
+          <span class="kw">And</span> a <span class="val">uniuty_rt</span> HttpOnly refresh token cookie is set<br/>
+          <span class="kw">And</span> the user's <span class="val">failed_attempts</span> counter is reset to <span class="val">0</span>
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-AUTH-02</div>
+        <div class="tc-title">Account Lockout After 5 Failed Attempts</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a user has made <span class="val">4</span> failed login attempts<br/>
+          <span class="kw">When</span> the user makes a 5th failed attempt<br/>
+          <span class="kw">Then</span> the account is locked (<span class="val">locked_until = NOW() + 30 minutes</span>)<br/>
+          <span class="kw">And</span> the API returns HTTP <span class="val">401</span> with error code <span class="val">ACCOUNT_LOCKED</span><br/>
+          <span class="kw">And</span> an unlock email is dispatched to the user's registered email within <span class="val">60 seconds</span><br/>
+          <span class="kw">And</span> subsequent login attempts return HTTP <span class="val">401</span> until the lockout expires
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-AUTH-03</div>
+        <div class="tc-title">Password Reset via OTP</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a user requests a password reset for their registered email<br/>
+          <span class="kw">When</span> a valid OTP and reset token are submitted with a new compliant password<br/>
+          <span class="kw">Then</span> the password is updated in the database<br/>
+          <span class="kw">And</span> all existing JWT sessions for the user are invalidated in Redis<br/>
+          <span class="kw">And</span> the user can log in with the new password<br/>
+          <span class="kw">And</span> the OTP is marked as used and cannot be reused
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-AUTH-04</div>
+        <div class="tc-title">Expired OTP Rejection</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a password reset OTP was generated <span class="val">16 minutes ago</span><br/>
+          <span class="kw">When</span> the user submits this OTP<br/>
+          <span class="kw">Then</span> the API returns HTTP <span class="val">401</span> with error <span class="val">OTP_EXPIRED</span><br/>
+          <span class="kw">And</span> the password is not changed<br/>
+          <span class="kw">And</span> the user is instructed to request a new OTP
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-AUTH-05</div>
+        <div class="tc-title">JWT Refresh Token Flow</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a user has an expired access token but a valid refresh token cookie<br/>
+          <span class="kw">When</span> the user calls <span class="val">POST /api/auth/refresh</span><br/>
+          <span class="kw">Then</span> a new access token is returned with HTTP <span class="val">200</span><br/>
+          <span class="kw">And</span> the old access token is added to the Redis denylist<br/>
+          <span class="kw">And</span> the new token contains the same user_id and role claims
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-AUTH-06</div>
+        <div class="tc-title">Role-Based Route Protection</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a user is authenticated with role <span class="val">"student"</span><br/>
+          <span class="kw">When</span> the user calls <span class="val">GET /api/users</span> (Admin/VC only endpoint)<br/>
+          <span class="kw">Then</span> the API returns HTTP <span class="val">403</span> with error code <span class="val">FORBIDDEN</span><br/>
+          <span class="kw">And</span> no user data is returned in the response body
+        </div>
+      </div>
+
+      <!-- BIOMETRIC -->
+      <h2 class="doc-h2" id="biometric">3. Biometric System</h2>
+
+      <div class="test-case">
+        <div class="tc-id">AC-BIO-01</div>
+        <div class="tc-title">Successful Biometric Enrollment</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> an admin is authenticated and the biometric terminal is online<br/>
+          <span class="kw">When</span> the admin enrolls 3 fingerprint samples for user <span class="val">"uuid-student-001"</span> each with quality ≥ <span class="val">70%</span><br/>
+          <span class="kw">Then</span> a combined template is created and stored encrypted in the biometric vault<br/>
+          <span class="kw">And</span> a record is written to <span class="val">biometric_log</span> with method <span class="val">"fingerprint"</span>, purpose <span class="val">"enrollment"</span>, and result <span class="val">"SUCCESS"</span><br/>
+          <span class="kw">And</span> the student's biometric enrollment status shows <span class="val">Fingerprint: Enrolled</span>
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-BIO-02</div>
+        <div class="tc-title">Biometric Verification — Match</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> student <span class="val">"uuid-student-001"</span> has an enrolled fingerprint template<br/>
+          <span class="kw">When</span> the student presents their finger at the terminal and <span class="val">BiometricAPI.verify()</span> is called<br/>
+          <span class="kw">Then</span> the API returns result <span class="val">VERIFIED</span> with confidence ≥ <span class="val">80%</span> within <span class="val">3 seconds</span><br/>
+          <span class="kw">And</span> a bio_token is returned, valid for <span class="val">10 minutes</span><br/>
+          <span class="kw">And</span> the verification event is logged in <span class="val">biometric_log</span>
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-BIO-03</div>
+        <div class="tc-title">Biometric Verification — No Match</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> student <span class="val">"uuid-student-002"</span> presents student <span class="val">"uuid-student-001"</span>'s finger (impersonation attempt)<br/>
+          <span class="kw">When</span> <span class="val">BiometricAPI.verify()</span> is called for <span class="val">"uuid-student-001"</span><br/>
+          <span class="kw">Then</span> the API returns result <span class="val">FAILED</span><br/>
+          <span class="kw">And</span> no bio_token is issued<br/>
+          <span class="kw">And</span> the failure is logged in <span class="val">biometric_log</span> with result <span class="val">"FAILED"</span><br/>
+          <span class="kw">And</span> if 3 FAILED events occur within 5 minutes for the same user, an admin alert is triggered
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-BIO-04</div>
+        <div class="tc-title">Template Deletion on Account Close</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a student account with enrolled biometric templates is deactivated by an admin<br/>
+          <span class="kw">When</span> the deactivation is confirmed<br/>
+          <span class="kw">Then</span> all biometric templates for the user are securely deleted from the vault within <span class="val">5 minutes</span><br/>
+          <span class="kw">And</span> a deletion event is logged in both <span class="val">biometric_log</span> and <span class="val">audit_log</span><br/>
+          <span class="kw">And</span> a subsequent verification attempt for this user returns <span class="val">TEMPLATE_NOT_FOUND</span>
+        </div>
+      </div>
+
+      <!-- ADMIN MODULE -->
+      <h2 class="doc-h2" id="admin">4. Admin Module</h2>
+
+      <div class="test-case">
+        <div class="tc-id">AC-ADMIN-01</div>
+        <div class="tc-title">Create User Account</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am authenticated as an Administrator<br/>
+          <span class="kw">When</span> I submit a valid user creation request with name, email, role <span class="val">"lecturer"</span>, and department_id<br/>
+          <span class="kw">Then</span> a new user record is created in the <span class="val">users</span> table<br/>
+          <span class="kw">And</span> a staff record is created in the <span class="val">staff</span> table linked to the new user<br/>
+          <span class="kw">And</span> a welcome email with a temporary password is sent within <span class="val">60 seconds</span><br/>
+          <span class="kw">And</span> the action is recorded in <span class="val">audit_log</span> with my admin user_id
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-ADMIN-02</div>
+        <div class="tc-title">Approve and Publish Results</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a result batch for <span class="val">CSC 301 Second Semester 2025/2026</span> is in <span class="val">pending</span> status<br/>
+          <span class="kw">When</span> I approve the batch<br/>
+          <span class="kw">Then</span> all result records in the batch are updated to <span class="val">status = published</span><br/>
+          <span class="kw">And</span> enrolled students receive an in-portal and email notification<br/>
+          <span class="kw">And</span> students can immediately view their grades<br/>
+          <span class="kw">And</span> the approval is timestamped with my name in the batch record
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-ADMIN-03</div>
+        <div class="tc-title">Reject Result Batch with Notes</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> a result batch is in <span class="val">pending</span> status<br/>
+          <span class="kw">When</span> I reject the batch with notes <span class="val">"3 students have scores exceeding maximum CA of 30"</span><br/>
+          <span class="kw">Then</span> the batch status changes to <span class="val">returned</span><br/>
+          <span class="kw">And</span> the lecturer who submitted receives a notification with the rejection notes<br/>
+          <span class="kw">And</span> the lecturer can edit and resubmit within the correction window
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-ADMIN-04</div>
+        <div class="tc-title">Audit Log is Immutable</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am authenticated as an Administrator<br/>
+          <span class="kw">When</span> I attempt to delete or update an audit_log entry via the API or directly on the database<br/>
+          <span class="kw">Then</span> the operation is rejected with an appropriate error<br/>
+          <span class="kw">And</span> the attempted modification itself is logged as a suspicious event<br/>
+          <span class="kw">And</span> an alert is sent to the VC
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-ADMIN-05</div>
+        <div class="tc-title">Bulk Student Import Validation</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I upload a CSV with 500 student records where 3 rows have duplicate matric numbers<br/>
+          <span class="kw">When</span> the system validates the file<br/>
+          <span class="kw">Then</span> import is rejected with a row-by-row error report showing the 3 duplicates<br/>
+          <span class="kw">And</span> no records are created until the file is corrected and re-uploaded<br/>
+          <span class="kw">And</span> upon successful re-upload, all 500 accounts are created with welcome emails sent
+        </div>
+      </div>
+
+      <!-- LECTURER MODULE -->
+      <h2 class="doc-h2" id="lecturer">5. Lecturer Module</h2>
+
+      <div class="test-case">
+        <div class="tc-id">AC-LEC-01</div>
+        <div class="tc-title">Score Entry and Calculation</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am authenticated as a Lecturer assigned to <span class="val">CSC 301</span><br/>
+          <span class="kw">When</span> I enter CA score <span class="val">25</span> and exam score <span class="val">58</span> for a student<br/>
+          <span class="kw">Then</span> the system displays total <span class="val">83</span> and grade <span class="val">"A"</span> automatically<br/>
+          <span class="kw">And</span> I can save as draft without submitting<br/>
+          <span class="kw">And</span> draft scores are persisted when I navigate away and return
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-LEC-02</div>
+        <div class="tc-title">Score Out of Range Rejection</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am on the result entry form for <span class="val">CSC 301</span><br/>
+          <span class="kw">When</span> I enter CA score <span class="val">35</span> (exceeds maximum of 30)<br/>
+          <span class="kw">Then</span> the field is highlighted red immediately with error <span class="val">"CA score cannot exceed 30"</span><br/>
+          <span class="kw">And</span> the submit button is disabled until the value is corrected<br/>
+          <span class="kw">And</span> the invalid score is not saved
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-LEC-03</div>
+        <div class="tc-title">Biometric-Verified Result Submission</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I have entered scores for all students in <span class="val">CSC 301</span><br/>
+          <span class="kw">When</span> I click <span class="val">"Submit for Approval"</span><br/>
+          <span class="kw">Then</span> I am prompted to verify my identity via fingerprint scan<br/>
+          <span class="kw">And</span> upon successful biometric verification, the batch is submitted<br/>
+          <span class="kw">And</span> the batch status changes to <span class="val">pending</span><br/>
+          <span class="kw">And</span> the result records include <span class="val">bio_verified = true</span> and my <span class="val">staff_id</span>
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-LEC-04</div>
+        <div class="tc-title">Attendance Session Recording</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I start an attendance session for <span class="val">CSC 301</span> on <span class="val">2026-06-05</span><br/>
+          <span class="kw">When</span> student <span class="val">24/CSC/001</span> taps their NFC card and biometric verification succeeds<br/>
+          <span class="kw">Then</span> an attendance record is created with <span class="val">bio_verified = true</span>, method <span class="val">"nfc"</span>, and session_date <span class="val">2026-06-05</span><br/>
+          <span class="kw">And</span> the real-time counter on my screen updates from <span class="val">0</span> to <span class="val">1</span> present
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-LEC-05</div>
+        <div class="tc-title">Result Submission Window Enforcement</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> the result submission deadline for Semester 2 has passed<br/>
+          <span class="kw">When</span> I attempt to submit a result batch<br/>
+          <span class="kw">Then</span> the submit button is disabled and a message reads <span class="val">"Submission window closed. Contact the registry to reopen."</span><br/>
+          <span class="kw">And</span> no scores can be submitted via the API either (server-side enforcement)
+        </div>
+      </div>
+
+      <!-- STUDENT MODULE -->
+      <h2 class="doc-h2" id="student">6. Student Module</h2>
+
+      <div class="test-case">
+        <div class="tc-id">AC-STU-01</div>
+        <div class="tc-title">Result Visibility After Publication</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> admin has approved and published results for <span class="val">2025/2026 Second Semester</span><br/>
+          <span class="kw">When</span> I log in as student <span class="val">24/CSC/001</span> and navigate to My Results<br/>
+          <span class="kw">Then</span> I see all course results with CA, exam, total, grade, and units displayed<br/>
+          <span class="kw">And</span> my CGPA is calculated and displayed correctly<br/>
+          <span class="kw">And</span> a <span class="val">Download Transcript</span> button is visible if I have no outstanding fees
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-STU-02</div>
+        <div class="tc-title">Transcript Download Blocked for Indebted Students</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am a student with a fee balance of <span class="val">₦50,000</span><br/>
+          <span class="kw">When</span> I navigate to My Results<br/>
+          <span class="kw">Then</span> the <span class="val">Download Transcript</span> button is disabled<br/>
+          <span class="kw">And</span> a message reads <span class="val">"Clear your outstanding balance to unlock transcript download"</span><br/>
+          <span class="kw">And</span> the <span class="val">GET /api/results/export</span> API returns HTTP <span class="val">403</span> if called directly
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-STU-03</div>
+        <div class="tc-title">Online Fee Payment Success</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I have an outstanding balance of <span class="val">₦250,000</span><br/>
+          <span class="kw">When</span> I initiate a Remita payment for <span class="val">₦250,000</span> and complete the gateway transaction<br/>
+          <span class="kw">And</span> Remita sends a successful webhook to the portal<br/>
+          <span class="kw">Then</span> my portal balance updates to <span class="val">₦0 outstanding</span><br/>
+          <span class="kw">And</span> a payment record is created in <span class="val">payments</span> with status <span class="val">"success"</span><br/>
+          <span class="kw">And</span> a PDF receipt is generated and emailed to me within <span class="val">2 minutes</span>
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-STU-04</div>
+        <div class="tc-title">Attendance Warning Display</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I have attended 8 of 12 sessions in <span class="val">MTH 201</span> (66.7% attendance)<br/>
+          <span class="kw">When</span> I view my attendance for <span class="val">MTH 201</span><br/>
+          <span class="kw">Then</span> the attendance percentage shows <span class="val">66.7%</span> highlighted in red<br/>
+          <span class="kw">And</span> a warning message reads <span class="val">"Below the 75% threshold required for exam eligibility"</span>
+        </div>
+      </div>
+
+      <div class="test-case">
+        <div class="tc-id">AC-STU-05</div>
+        <div class="tc-title">Profile Update — Allowed Fields Only</div>
+        <div class="gherkin">
+          <span class="kw">Given</span> I am authenticated as a student<br/>
+          <span class="kw">When</span> I attempt to update my phone number to <span class="val">"+2348012345678"</span><br/>
+          <span class="kw">Then</span> the update is saved and reflected on my profile immediately<br/>
+          <span class="kw">When</span> I attempt to change my matric number via the profile API<br/>
+          <span class="kw">Then</span> the API returns HTTP <span class="val">403</span> — matric number is admin-managed only
+        </div>
+      </div>
+
+      <!-- DEFINITION OF DONE -->
+      <h2 class="doc-h2" id="dod">7. Definition of Done</h2>
+      <p>A feature is considered <strong>Done</strong> when ALL of the following conditions are met:</p>
+      <ul>
+        <li>All acceptance criteria Gherkin scenarios pass in the staging environment</li>
+        <li>Unit test coverage for the feature's core logic is ≥ 80%</li>
+        <li>Integration tests cover the full API endpoint (happy path + at least 2 error paths)</li>
+        <li>Code has been reviewed and approved by at least 1 peer developer</li>
+        <li>Security review completed for any endpoint touching sensitive data (PII, payments, biometrics)</li>
+        <li>The feature is documented: API docs updated, relevant PRD section marked complete</li>
+        <li>QA Lead has signed off on the test run in staging</li>
+        <li>No open P1 or P2 defects exist for this feature</li>
+        <li>Audit log confirms the feature generates the expected log entries</li>
+        <li>Accessibility: interactive elements are keyboard-navigable and have ARIA labels</li>
+      </ul>
+
+    </main>
+  </div>
+</body>
+</html>

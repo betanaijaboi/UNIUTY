@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Flows — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">User Flow Diagrams</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#login">Login Flow</a></li>
+        <li><a href="#biometric">Biometric Flow</a></li>
+        <li><a href="#result-submission">Result Submission Flow</a></li>
+        <li><a href="#password-recovery">Password Recovery Flow</a></li>
+        <li><a href="#fee-payment">Fee Payment Flow</a></li>
+        <li><a href="#role-promotion">Role Promotion Flow</a></li>
+        <li><a href="#student-registration">Student Registration Flow</a></li>
+        <li><a href="#admission">Admission Flow</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">User Flow Diagrams</h1>
+      <p class="doc-lead">Visual step-by-step flow diagrams for all major portal journeys. Each flow shows the decision branches, success paths, and error handling states.</p>
+
+      <!-- LOGIN FLOW -->
+      <h2 class="doc-h2" id="login">1. Login Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">User visits portal</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Enter Portal ID &amp; Password</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Credentials valid?</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Account locked?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box err">Show error<br/>Increment attempt</div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-box decision">Attempts ≥ 5?</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box err">Lock account<br/>Send unlock email</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Check Role</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Biometric required?</div>
+        <div class="flow-arrow">→ YES →</div>
+        <div class="flow-box step">Prompt biometric</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Bio verified?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Issue JWT token</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Set session cookie</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Redirect to role dashboard</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box end">Session Active</div>
+      </div>
+      <div class="callout callout-info">
+        <strong>Branch Conditions:</strong> If credentials are invalid, the system increments a failed_attempts counter. At 5 failures, the account is locked for 30 minutes and an unlock email is dispatched. Biometric challenge is only presented to Admin and VC roles, or when the session is initiated from a registered biometric terminal. Students and Lecturers accessing from unregistered devices skip the biometric challenge and proceed with JWT only.
+      </div>
+
+      <!-- BIOMETRIC FLOW -->
+      <h2 class="doc-h2" id="biometric">2. Biometric Verification Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">Trigger Event<br/>(Exam / Attendance)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Lecturer starts<br/>check-in session</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Student presents<br/>biometric</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">BiometricAPI.verify()</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box decision">Quality score ≥ 70%?</div>
+        <div class="flow-arrow">NO →</div>
+        <div class="flow-box err">Retry prompt<br/>(max 3 attempts)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">3 retries exceeded?</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box err">Flag for manual<br/>ID check</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box decision">Template match?</div>
+        <div class="flow-arrow">YES →</div>
+        <div class="flow-box step">Record attendance /<br/>grant exam entry</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Log to biometric_log</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box end">VERIFIED ✓</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box err">FAILED — Log event<br/>Alert admin if 3 failures</div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-box decision">Match?</div>
+      </div>
+      <div class="callout callout-warn">
+        <strong>Branch Conditions:</strong> A quality score below 70% (e.g. smudged fingerprint, poor lighting for facial scan) triggers up to 3 automatic retries before escalating. If 3 consecutive verifications fail for the same user within 5 minutes, an automated alert is sent to the duty administrator. The student is held and directed for manual identity verification using their student ID card.
+      </div>
+
+      <!-- RESULT SUBMISSION FLOW -->
+      <h2 class="doc-h2" id="result-submission">3. Result Submission Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">Lecturer logs in</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Navigate to<br/>Results → My Courses</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Submission window<br/>open?</div>
+        <div class="flow-arrow">NO →</div>
+        <div class="flow-box err">Show deadline<br/>message</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Enter CA &amp; Exam<br/>scores per student</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">CSV upload<br/>or manual?</div>
+        <div class="flow-arrow">CSV →</div>
+        <div class="flow-box step">Upload &amp; validate<br/>CSV file</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Validation errors?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Save as draft</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Click Submit</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Biometric verify<br/>lecturer identity</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Verified?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Status: Pending Review</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Admin notified</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Admin approves?</div>
+        <div class="flow-arrow">YES →</div>
+        <div class="flow-box end">Published to students</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box err">Returned to lecturer<br/>with notes</div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-box decision">Approved?</div>
+      </div>
+      <div class="callout callout-info">
+        <strong>Branch Conditions:</strong> Lecturers must complete biometric verification before final submission — this creates an irrefutable digital signature linking the submission to the lecturer's authenticated identity. The admin approval stage acts as a second layer of review. Returned batches enter a correction window (48h default) and are re-submitted for approval. Once published, students receive immediate in-portal and email notifications.
+      </div>
+
+      <!-- PASSWORD RECOVERY FLOW -->
+      <h2 class="doc-h2" id="password-recovery">4. Password Recovery Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">User clicks<br/>"Forgot Password"</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Enter Portal ID<br/>or registered email</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">User exists?</div>
+        <div class="flow-arrow">NO →</div>
+        <div class="flow-box step">Show generic message<br/>(no user enumeration)</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Generate 6-digit OTP<br/>+ reset token (15 min TTL)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Send OTP to<br/>registered email</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">User enters OTP</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">OTP valid?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Show new password<br/>form</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Password meets<br/>complexity?</div>
+        <div class="flow-arrow">YES →</div>
+        <div class="flow-box step">Hash &amp; save<br/>new password</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Invalidate all<br/>sessions</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box end">Redirect to Login</div>
+      </div>
+      <div class="callout callout-warn">
+        <strong>Branch Conditions:</strong> The system shows the same success message whether or not the user exists — this prevents account enumeration attacks. OTP codes expire after 15 minutes and are single-use. If the OTP has expired, the user must start the flow again. The rate limiter allows a maximum of 3 password reset requests per hour per IP address.
+      </div>
+
+      <!-- FEE PAYMENT FLOW -->
+      <h2 class="doc-h2" id="fee-payment">5. Fee Payment Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">Student logs in</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Navigate to<br/>Fees &amp; Payments</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">View outstanding<br/>balance</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Click "Pay Now"</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box decision">Select gateway:<br/>Remita or Flutterwave?</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Redirect to payment<br/>gateway (HTTPS)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Student completes<br/>payment</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Gateway webhook<br/>received?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box decision">Payment status<br/>= success?</div>
+        <div class="flow-arrow">YES →</div>
+        <div class="flow-box step">Update fees.amount_paid<br/>Create payment record</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Generate PDF receipt</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Email confirmation</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box end">Cleared ✓</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box err">Log failed payment<br/>Show retry message</div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-box decision">Success?</div>
+      </div>
+      <div class="callout callout-info">
+        <strong>Branch Conditions:</strong> Payment reconciliation is webhook-driven — the portal does not poll the gateway. If the webhook is not received within 10 minutes of a gateway redirect, the portal shows a "Payment Pending" state and advises the student to wait. A background reconciliation job runs every 30 minutes to resolve pending transactions. Partial payments are accepted; balance is updated accordingly.
+      </div>
+
+      <!-- ROLE PROMOTION FLOW -->
+      <h2 class="doc-h2" id="role-promotion">6. Role Promotion Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">Admin initiates<br/>role promotion</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Select user &amp;<br/>new role</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Enter justification<br/>note</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Promoting to<br/>Admin or VC?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Submit for<br/>VC approval</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">VC receives<br/>notification</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">VC reviews &amp;<br/>biometric-verifies</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">VC approves?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Role updated<br/>in database</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">User &amp; admin<br/>notified</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Audit log entry<br/>created</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box end">Promotion Complete</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box err">Promotion rejected<br/>Admin &amp; user notified</div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-box decision">Approved?</div>
+      </div>
+      <div class="callout callout-warn">
+        <strong>Branch Conditions:</strong> Promotions to Lecturer role can be approved by Admin alone. Promotions to Administrator or Vice Chancellor require VC biometric approval. The VC role itself can only be assigned by the system superadmin (root account) during initial setup. If VC rejects, the rejection reason is visible to the requesting admin but not to the affected user.
+      </div>
+
+      <!-- STUDENT REGISTRATION FLOW -->
+      <h2 class="doc-h2" id="student-registration">7. Student Registration Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">Admin receives<br/>admission list</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Import via CSV<br/>or manual entry</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">Validation errors<br/>in data?</div>
+        <div class="flow-arrow">YES →</div>
+        <div class="flow-box err">Show error report<br/>Fix and re-import</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">System creates<br/>student records</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Generate matric<br/>numbers</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Send welcome email<br/>with credentials</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Student first login<br/>(forced password change)</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Book biometric<br/>enrollment session</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Admin enrolls<br/>biometrics at terminal</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">All 4 methods<br/>enrolled?</div>
+        <div class="flow-arrow">YES →</div>
+        <div class="flow-box end">Registration Complete</div>
+      </div>
+      <div class="callout callout-info">
+        <strong>Branch Conditions:</strong> Students who miss biometric enrollment can still log in and view their portal but are restricted from certain actions (e.g. cannot download transcript) until enrollment is complete. The portal tracks enrollment coverage per student and sends weekly reminders for incomplete profiles. At least Fingerprint enrollment is required before the first exam sit.
+      </div>
+
+      <!-- ADMISSION FLOW -->
+      <h2 class="doc-h2" id="admission">8. Admission Flow</h2>
+      <div class="flow-row">
+        <div class="flow-box start">Applicant submits<br/>application (external)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Admin imports<br/>JAMB/UTME data</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">System creates<br/>admission record</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">UTME score<br/>meets cutoff?</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Move to<br/>shortlist</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box decision">O'Level credits<br/>verified?</div>
+        <div class="flow-arrow">YES →</div>
+        <div class="flow-box step">Offer admission</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Applicant notified<br/>via email/SMS</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box step">Applicant accepts<br/>offer online</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Admin converts to<br/>student account</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box step">Fee invoice<br/>generated</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box end">Student Onboarded</div>
+      </div>
+      <div class="flow-row" style="margin-top:0.5rem;">
+        <div class="flow-box err">Status: Rejected<br/>Applicant notified</div>
+        <div class="flow-arrow">←</div>
+        <div class="flow-box decision">Cutoff met?</div>
+      </div>
+      <div class="callout callout-info">
+        <strong>Branch Conditions:</strong> Applicants who do not meet the UTME cutoff are automatically marked as Rejected; they receive a polite rejection email. Those who meet UTME cutoff but have O'Level discrepancies are placed in a "Pending Verification" status while registry staff validate their certificates. Acceptance deadline is 14 days from offer date; offers not accepted within the window are automatically withdrawn.
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

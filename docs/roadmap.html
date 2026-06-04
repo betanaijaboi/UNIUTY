@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roadmap — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">Project Roadmap &amp; Milestones</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#phase-details">Phase Details</a></li>
+        <li><a href="#release-calendar">Release Calendar</a></li>
+        <li><a href="#team">Team Composition</a></li>
+        <li><a href="#risks">Risk Register</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">Project Roadmap &amp; Milestones</h1>
+      <p class="doc-lead">A four-phase delivery plan taking UNIUTY Portal from initial MVP through full-scale multi-campus expansion, with milestones, team composition, and a risk register.</p>
+
+      <div class="callout callout-info">
+        <strong>Delivery Model:</strong> Agile sprints (2-week cadence). <strong>Start Date:</strong> Week 1 = 7 July 2026. <strong>Full Go-Live Target:</strong> Week 22 = 20 November 2026.
+      </div>
+
+      <!-- OVERVIEW -->
+      <h2 class="doc-h2" id="overview">1. Overview</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Phase</th><th>Duration</th><th>Theme</th><th>Key Deliverable</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-must">Phase 1</span></td><td>Weeks 1–8</td><td>MVP</td><td>Core auth, role portals, result posting, simulated biometrics</td></tr>
+            <tr><td><span class="pill pill-should">Phase 2</span></td><td>Weeks 9–16</td><td>Beta</td><td>Real biometric hardware, fee payment, attendance, audit logs</td></tr>
+            <tr><td><span class="pill pill-could">Phase 3</span></td><td>Weeks 17–22</td><td>Launch</td><td>UAT, security audit, performance hardening, go-live</td></tr>
+            <tr><td><span class="pill pill-info">Phase 4</span></td><td>Months 6–12</td><td>Scale</td><td>Multi-campus, mobile app, advanced analytics, AI fraud detection</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PHASE DETAILS -->
+      <h2 class="doc-h2" id="phase-details">2. Phase Details</h2>
+
+      <!-- PHASE 1 -->
+      <div class="phase">
+        <div class="phase-hdr">
+          <span class="phase-num">01</span>
+          <span>Phase 1 — MVP (Weeks 1–8)</span>
+          <span class="pill pill-must">In Progress</span>
+        </div>
+
+        <h3 class="doc-h3">Sprint 1–2: Foundation &amp; Infrastructure (Weeks 1–4)</h3>
+        <ul>
+          <li>Set up monorepo, GitHub Actions CI/CD pipeline, Docker dev environment</li>
+          <li>Design and migrate PostgreSQL schema (all 14 tables)</li>
+          <li>Implement JWT authentication, bcrypt password hashing, RBAC middleware</li>
+          <li>Build Admin user management CRUD: create, read, update, suspend, delete</li>
+          <li>Implement session management, token refresh, logout with Redis denylist</li>
+        </ul>
+
+        <h3 class="doc-h3">Sprint 3–4: Role Portals &amp; Results (Weeks 5–8)</h3>
+        <ul>
+          <li>Build Student dashboard: results view, course list, basic profile management</li>
+          <li>Build Lecturer dashboard: assigned courses, result entry form, CSV upload</li>
+          <li>Build Admin dashboard: user list, result approval workflow, department management</li>
+          <li>Build VC dashboard: basic KPI summary, result overview</li>
+          <li>Implement simulated biometric (PIN fallback) for testing before hardware arrives</li>
+          <li>Result publication pipeline: submit → pending → approve → published</li>
+          <li>Email notification service integration (Nodemailer + SMTP)</li>
+        </ul>
+
+        <div class="milestone"><span class="ms-dot"></span> <strong>M1.1</strong> — Dev environment and CI/CD pipeline operational (End of Week 2)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M1.2</strong> — All 4 role dashboards functional in dev environment (End of Week 6)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M1.3</strong> — MVP demo to Steering Committee — result flow end-to-end (End of Week 8)</div>
+      </div>
+
+      <!-- PHASE 2 -->
+      <div class="phase">
+        <div class="phase-hdr">
+          <span class="phase-num">02</span>
+          <span>Phase 2 — Beta (Weeks 9–16)</span>
+          <span class="pill pill-should">Planned</span>
+        </div>
+
+        <h3 class="doc-h3">Sprint 5–6: Biometric Hardware Integration (Weeks 9–12)</h3>
+        <ul>
+          <li>Deploy BiometricAPI plugin interface with real hardware driver (Suprema BioStation)</li>
+          <li>Fingerprint, retina, facial scan, and NFC enrollment flows</li>
+          <li>Biometric verification at exam entry and attendance recording</li>
+          <li>Biometric log viewer for Admin and VC</li>
+          <li>AES-256 template encryption and secure vault schema</li>
+          <li>Liveness detection testing and quality threshold calibration</li>
+        </ul>
+
+        <h3 class="doc-h3">Sprint 7–8: Fees, Payments &amp; Attendance (Weeks 13–16)</h3>
+        <ul>
+          <li>Remita and Flutterwave payment gateway integration</li>
+          <li>Fee invoice generation and payment webhook reconciliation</li>
+          <li>PDF receipt and payment history dashboard</li>
+          <li>NFC and facial attendance recording with real-time class counter</li>
+          <li>Attendance report generation (PDF export for Senate)</li>
+          <li>Full audit log implementation with HMAC integrity signatures</li>
+          <li>SMS notifications via Termii (payment receipts, attendance warnings)</li>
+        </ul>
+
+        <div class="milestone"><span class="ms-dot"></span> <strong>M2.1</strong> — Biometric hardware enrolled and verified for 50 test users (End of Week 12)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M2.2</strong> — First live payment processed via Remita integration (End of Week 14)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M2.3</strong> — Beta release to 200 pilot users (50 students, 20 staff) — End of Week 16</div>
+      </div>
+
+      <!-- PHASE 3 -->
+      <div class="phase">
+        <div class="phase-hdr">
+          <span class="phase-num">03</span>
+          <span>Phase 3 — Launch (Weeks 17–22)</span>
+          <span class="pill pill-could">Planned</span>
+        </div>
+
+        <h3 class="doc-h3">Sprint 9–10: UAT &amp; Security Hardening (Weeks 17–20)</h3>
+        <ul>
+          <li>University Acceptance Testing with student reps, lecturer reps, admin reps, bursary</li>
+          <li>External penetration test (contracted to a certified NCC-licensed security firm)</li>
+          <li>OWASP Top 10 vulnerability remediation</li>
+          <li>Load testing: simulate 15,000 concurrent users (k6 test suite)</li>
+          <li>Performance tuning: slow query optimisation, Redis caching layer for hot paths</li>
+          <li>NDPR DPIA final review; DPO sign-off</li>
+          <li>Backup restoration drill: verify RPO ≤ 1h, RTO ≤ 4h</li>
+        </ul>
+
+        <h3 class="doc-h3">Sprint 11–12: Go-Live (Weeks 21–22)</h3>
+        <ul>
+          <li>Legacy data migration: 12,847 student records, 634 staff records from existing spreadsheets</li>
+          <li>Biometric mass enrollment campaign (ICT Centre — 3 weeks pre-launch)</li>
+          <li>Staff training workshops: Admins (2 days), Lecturers (1 day), Student orientation videos</li>
+          <li>Production deployment with blue-green strategy; canary release at 5% → 25% → 100%</li>
+          <li>Monitoring dashboards live: UptimeRobot, New Relic, Sentry</li>
+          <li>Hypercare support period: 2 weeks post-launch with 24/7 on-call rota</li>
+        </ul>
+
+        <div class="milestone"><span class="ms-dot"></span> <strong>M3.1</strong> — Security audit report completed; all critical findings resolved (End of Week 19)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M3.2</strong> — UAT sign-off from all stakeholder groups (End of Week 20)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M3.3</strong> — Production go-live for all 13,000+ users (End of Week 22 — 20 Nov 2026)</div>
+      </div>
+
+      <!-- PHASE 4 -->
+      <div class="phase">
+        <div class="phase-hdr">
+          <span class="phase-num">04</span>
+          <span>Phase 4 — Scale (Months 6–12)</span>
+          <span class="pill pill-info">Future</span>
+        </div>
+
+        <h3 class="doc-h3">Month 6–8: Multi-Campus Expansion</h3>
+        <ul>
+          <li>Tenant-aware data model activation (campus_id column on all entities)</li>
+          <li>Campus-level admin roles and isolation controls</li>
+          <li>Cross-campus reporting for VC and system superadmin</li>
+          <li>On-boarding of 2 satellite campuses with their own biometric hardware</li>
+        </ul>
+
+        <h3 class="doc-h3">Month 9–10: Native Mobile App (React Native)</h3>
+        <ul>
+          <li>iOS and Android apps wrapping portal APIs</li>
+          <li>Biometric login via device-native fingerprint (Face ID / Touch ID)</li>
+          <li>Push notifications for results, fees, and announcements</li>
+          <li>Offline mode for attendance viewing and results (read-only cache)</li>
+        </ul>
+
+        <h3 class="doc-h3">Month 11–12: Advanced Analytics &amp; AI Fraud Detection</h3>
+        <ul>
+          <li>ML model trained on 2+ semesters of biometric and result data</li>
+          <li>Anomaly detection: flag unusual score patterns (e.g. entire class scoring 100% in CA)</li>
+          <li>Predictive analytics: at-risk student early warning system based on attendance + grades</li>
+          <li>VC analytics dashboard with trend charts, cohort analysis, and benchmarking</li>
+        </ul>
+
+        <div class="milestone"><span class="ms-dot"></span> <strong>M4.1</strong> — Second campus onboarded (Month 8)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M4.2</strong> — Mobile apps published to App Store and Play Store (Month 10)</div>
+        <div class="milestone"><span class="ms-dot"></span> <strong>M4.3</strong> — AI fraud detection system live with first semester of training data (Month 12)</div>
+      </div>
+
+      <!-- RELEASE CALENDAR -->
+      <h2 class="doc-h2" id="release-calendar">3. Release Calendar</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Version</th><th>Date</th><th>Key Features</th><th>Audience</th></tr></thead>
+          <tbody>
+            <tr><td>v0.1-dev</td><td>Week 2 (21 Jul 2026)</td><td>CI/CD, DB schema, Auth skeleton</td><td>Dev team internal</td></tr>
+            <tr><td>v0.5-alpha</td><td>Week 8 (18 Aug 2026)</td><td>All 4 dashboards, simulated biometric, result flow</td><td>Steering Committee demo</td></tr>
+            <tr><td>v0.9-beta</td><td>Week 16 (13 Oct 2026)</td><td>Real biometric, payments, attendance, audit log</td><td>200-user pilot group</td></tr>
+            <tr><td>v1.0-rc</td><td>Week 20 (10 Nov 2026)</td><td>Security hardened, load tested, data migrated</td><td>All staff (training run)</td></tr>
+            <tr><td>v1.0</td><td>Week 22 (20 Nov 2026)</td><td>Full production release</td><td>All 13,000+ users</td></tr>
+            <tr><td>v1.1</td><td>Month 4</td><td>Bug fixes, performance improvements post-launch</td><td>All users</td></tr>
+            <tr><td>v2.0</td><td>Month 8</td><td>Multi-campus support</td><td>All campuses</td></tr>
+            <tr><td>v3.0</td><td>Month 10</td><td>Native mobile apps</td><td>App Store / Play Store</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TEAM COMPOSITION -->
+      <h2 class="doc-h2" id="team">4. Team Composition</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>Role</th><th>Count</th><th>Responsibilities</th></tr></thead>
+          <tbody>
+            <tr><td>Project Manager</td><td>1</td><td>Sprint planning, stakeholder comms, risk management, budget</td></tr>
+            <tr><td>Full-Stack Developer</td><td>3</td><td>Backend API, frontend portals, database, integrations</td></tr>
+            <tr><td>UI/UX Designer</td><td>1</td><td>Wireframes, design system, component library, accessibility</td></tr>
+            <tr><td>DevOps / Cloud Engineer</td><td>1</td><td>CI/CD, Docker, Kubernetes, monitoring, backups, security infrastructure</td></tr>
+            <tr><td>QA Engineer</td><td>1</td><td>Test plan, test case execution, UAT facilitation, defect tracking</td></tr>
+            <tr><td>Biometric Hardware Specialist</td><td>1</td><td>Hardware installation, BiometricAPI driver development, enrollment campaigns</td></tr>
+            <tr><td>ICT Director (UNIUTY)</td><td>1</td><td>Internal stakeholder, infrastructure access, staff coordination</td></tr>
+            <tr><td>Data Protection Officer</td><td>1 (part-time)</td><td>NDPR compliance review, DPIA sign-off, breach procedures</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RISK REGISTER -->
+      <h2 class="doc-h2" id="risks">5. Risk Register</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead><tr><th>ID</th><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Overall</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>R-01</td>
+              <td>Biometric hardware delivery delayed or incompatible with BiometricAPI</td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td>Simulated biometric mode in Phase 1; hardware vendor locked in by Week 4; 2 alternative vendor SDKs pre-evaluated</td>
+            </tr>
+            <tr>
+              <td>R-02</td>
+              <td>Remita payment gateway API changes or downtime during launch</td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td>Flutterwave implemented as hot standby; payment gateway abstraction layer enables < 1-hour switch</td>
+            </tr>
+            <tr>
+              <td>R-03</td>
+              <td>Legacy student data quality is poor — high error rate in migration CSV</td>
+              <td><span class="pill pill-high">High</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td>Data audit begins Week 4; Registry dedicate 2 staff to clean source data; migration tool validates before importing</td>
+            </tr>
+            <tr>
+              <td>R-04</td>
+              <td>Low biometric enrollment adoption — students don't show up for enrollment sessions</td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td>Mandate biometric enrollment as requirement for exam clearance; multiple enrollment stations across campus; mobile enrollment unit</td>
+            </tr>
+            <tr>
+              <td>R-05</td>
+              <td>Poor internet connectivity in some campus buildings</td>
+              <td><span class="pill pill-high">High</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td>Offline-capable attendance mode with sync on reconnection; ICT to audit and upgrade Wi-Fi coverage before launch</td>
+            </tr>
+            <tr>
+              <td>R-06</td>
+              <td>Staff resistance to biometric authentication</td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-low">Low</span></td>
+              <td><span class="pill pill-low">Low</span></td>
+              <td>Staff consultation workshops in Phase 3; clear privacy policy communication; NDPR consent process transparent</td>
+            </tr>
+            <tr>
+              <td>R-07</td>
+              <td>Security breach during go-live period (targeted attack on new system)</td>
+              <td><span class="pill pill-low">Low</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td>External pen test before launch; Cloudflare WAF active; Sentry + security alerts; incident response plan exercised</td>
+            </tr>
+            <tr>
+              <td>R-08</td>
+              <td>Key developer departure mid-project</td>
+              <td><span class="pill pill-low">Low</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td>Full code documentation; Git history; pair programming for critical modules; onboarding docs up to date</td>
+            </tr>
+            <tr>
+              <td>R-09</td>
+              <td>Budget overrun due to hardware procurement or cloud costs</td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td>On-premise option (self-hosted VMs) as fallback for cloud cost; hardware budget locked in purchase order by Week 2</td>
+            </tr>
+            <tr>
+              <td>R-10</td>
+              <td>NDPR non-compliance identified in external audit</td>
+              <td><span class="pill pill-low">Low</span></td>
+              <td><span class="pill pill-high">High</span></td>
+              <td><span class="pill pill-med">Medium</span></td>
+              <td>DPIA completed in Phase 3; DPO reviews each phase; legal counsel review of data processing agreements</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

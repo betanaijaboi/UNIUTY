@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UNIUTY Portal — Documentation Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="docs.css">
+<style>
+.hub-hero{background:var(--navy);padding:56px 48px;text-align:center}
+.hub-hero h1{font-family:'Playfair Display',serif;font-size:36px;color:var(--gold);margin-bottom:8px}
+.hub-hero p{font-size:14px;color:rgba(255,255,255,0.5);max-width:560px;margin:0 auto 24px}
+.hub-meta{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.hub-meta-item{font-size:11px;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:5px}
+.hub-main{max-width:1100px;margin:0 auto;padding:48px 32px}
+.hub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px}
+.doc-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;text-decoration:none;color:inherit;transition:all 0.15s;display:flex;flex-direction:column;gap:10px}
+.doc-card:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(201,168,76,0.12);transform:translateY(-2px)}
+.dc-num{font-size:11px;font-weight:700;color:var(--muted);font-family:'Courier New',monospace}
+.dc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.dc-title{font-size:14px;font-weight:600;color:var(--navy)}
+.dc-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.dc-tag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px}
+.hub-section{margin-bottom:40px}
+.hub-section-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:4px}
+.hub-section-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+@media(max-width:900px){.hub-grid{grid-template-columns:1fr 1fr}.hub-hero{padding:36px 24px}}
+@media(max-width:600px){.hub-grid{grid-template-columns:1fr}.hub-main{padding:28px 16px}}
+</style>
+</head><body>
+<div class="hub-hero">
+  <div class="hub-meta" style="margin-bottom:20px">
+    <div class="hub-meta-item"><span style="color:var(--gold)">●</span> UNIUTY University Portal</div>
+  </div>
+  <h1>Project Documentation</h1>
+  <p>Complete documentation suite for the UNIUTY University Portal — from product requirements to deployment plan.</p>
+  <div class="hub-meta">
+    <div class="hub-meta-item">📋 15 Deliverables</div>
+    <div class="hub-meta-item">📅 June 2026</div>
+    <div class="hub-meta-item">🏛️ ICT Development Unit</div>
+    <div class="hub-meta-item">🔒 Confidential</div>
+  </div>
+</div>
+
+<div class="hub-main">
+  <div class="hub-section">
+    <div class="hub-section-title">Product & Strategy</div>
+    <div class="hub-section-sub">Define the why, who, and what of the system.</div>
+    <div class="hub-grid">
+      <a class="doc-card" href="prd.html">
+        <div class="dc-num">01</div>
+        <div class="dc-icon" style="background:#E6F0FB;color:#0c447c"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4"/></svg></div>
+        <div class="dc-title">Product Requirements Document</div>
+        <div class="dc-desc">Problem statement, target users, business goals, success metrics, feature prioritization (MoSCoW).</div>
+        <span class="dc-tag" style="background:#E6F0FB;color:#0c447c">PRD</span>
+      </a>
+      <a class="doc-card" href="user-stories.html">
+        <div class="dc-num">02</div>
+        <div class="dc-icon" style="background:#EBF5EC;color:#0e5e3b"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
+        <div class="dc-title">User Stories & Use Cases</div>
+        <div class="dc-desc">40+ user stories across all four roles with acceptance criteria in Gherkin format.</div>
+        <span class="dc-tag" style="background:#EBF5EC;color:#0e5e3b">Stories</span>
+      </a>
+      <a class="doc-card" href="roadmap.html">
+        <div class="dc-num">13</div>
+        <div class="dc-icon" style="background:var(--gold-pale);color:var(--warn)"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12l4-5 3 3 5-7"/><path d="M11 5h4v4"/></svg></div>
+        <div class="dc-title">Project Roadmap & Milestones</div>
+        <div class="dc-desc">Phase-by-phase delivery plan: MVP → Beta → Launch → Scale with timeline and deliverables.</div>
+        <span class="dc-tag" style="background:var(--gold-pale);color:var(--warn)">Roadmap</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hub-section">
+    <div class="hub-section-title">Design & Architecture</div>
+    <div class="hub-section-sub">Visual blueprints for the system structure and user experience.</div>
+    <div class="hub-grid">
+      <a class="doc-card" href="user-flows.html">
+        <div class="dc-num">03</div>
+        <div class="dc-icon" style="background:#EEEDFE;color:#3C3489"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2v12M2 8h12"/><circle cx="8" cy="2" r="1.5" fill="currentColor"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/></svg></div>
+        <div class="dc-title">User Flow Diagrams</div>
+        <div class="dc-desc">Step-by-step flows for login, recovery, result submission, fee payment, role promotion, and more.</div>
+        <span class="dc-tag" style="background:#EEEDFE;color:#3C3489">Flows</span>
+      </a>
+      <a class="doc-card" href="wireframes.html">
+        <div class="dc-num">07</div>
+        <div class="dc-icon" style="background:#FFF5E0;color:#8a6a1a"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="2" width="14" height="11" rx="1.5"/><path d="M1 5h14M5 5v8"/></svg></div>
+        <div class="dc-title">Wireframes</div>
+        <div class="dc-desc">9 annotated wireframe screens with mobile layouts, flow diagrams, and component states.</div>
+        <span class="dc-tag" style="background:#FFF5E0;color:#8a6a1a">Wireframes</span>
+      </a>
+      <a class="doc-card" href="design-system.html">
+        <div class="dc-num">08</div>
+        <div class="dc-icon" style="background:#F1EFE8;color:#5F5E5A"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="5" cy="5" r="3"/><rect x="9" y="9" width="5" height="5" rx="1"/><path d="M11.5 1.5l-3 7"/></svg></div>
+        <div class="dc-title">Design System & Style Guide</div>
+        <div class="dc-desc">Colour palette, typography, component library, icon set, spacing rules, and branding guidelines.</div>
+        <span class="dc-tag" style="background:#F1EFE8;color:#5F5E5A">Design</span>
+      </a>
+      <a class="doc-card" href="architecture.html">
+        <div class="dc-num">05</div>
+        <div class="dc-icon" style="background:var(--navy);color:var(--gold)"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></div>
+        <div class="dc-title">System Architecture Diagram</div>
+        <div class="dc-desc">Client layer, API layer, database, biometric hardware, third-party services, and cloud infrastructure.</div>
+        <span class="dc-tag" style="background:var(--navy);color:var(--gold)">Architecture</span>
+      </a>
+      <a class="doc-card" href="erd.html">
+        <div class="dc-num">04</div>
+        <div class="dc-icon" style="background:#EBF5EC;color:#0e5e3b"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><ellipse cx="8" cy="4" rx="6" ry="2"/><path d="M14 4v4c0 1.1-2.7 2-6 2S2 9.1 2 8V4"/><path d="M14 8v4c0 1.1-2.7 2-6 2S2 13.1 2 12V8"/></svg></div>
+        <div class="dc-title">Database Design / ERD</div>
+        <div class="dc-desc">Entity-Relationship Diagram with 14 tables, primary keys, foreign keys, and relationships.</div>
+        <span class="dc-tag" style="background:#EBF5EC;color:#0e5e3b">ERD</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hub-section">
+    <div class="hub-section-title">Technical Specifications</div>
+    <div class="hub-section-sub">Developer-facing documentation for building and integrating the system.</div>
+    <div class="hub-grid">
+      <a class="doc-card" href="api-docs.html">
+        <div class="dc-num">06</div>
+        <div class="dc-icon" style="background:#E6F0FB;color:#0c447c"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 4l-3 4 3 4M11 4l3 4-3 4M9 2l-2 12"/></svg></div>
+        <div class="dc-title">API Documentation</div>
+        <div class="dc-desc">All REST endpoints, request/response schemas, authentication, error codes, and examples.</div>
+        <span class="dc-tag" style="background:#E6F0FB;color:#0c447c">API</span>
+      </a>
+      <a class="doc-card" href="UNIUTY_SRS.docx">
+        <div class="dc-num">SRS</div>
+        <div class="dc-icon" style="background:#FFF5E0;color:#8a6a1a"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="1" width="10" height="14" rx="1.5"/><path d="M6 5h4M6 8h4M6 11h2"/></svg></div>
+        <div class="dc-title">Software Requirements Specification</div>
+        <div class="dc-desc">Complete SRS with 60+ functional requirements, NFRs, biometric plugin spec, and appendices. (Word)</div>
+        <span class="dc-tag" style="background:#FFF5E0;color:#8a6a1a">DOCX</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hub-section">
+    <div class="hub-section-title">Quality & Delivery</div>
+    <div class="hub-section-sub">Ensuring the system is correct, secure, and maintainable.</div>
+    <div class="hub-grid">
+      <a class="doc-card" href="security.html">
+        <div class="dc-num">11</div>
+        <div class="dc-icon" style="background:#FCEAEA;color:#791f1f"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1.5L2 4.5v5C2 13 4.8 15.5 8 16.5c3.2-1 6-3.5 6-7v-5L8 1.5z"/><path d="M5.5 8.5l2 2 3-3.5"/></svg></div>
+        <div class="dc-title">Security Requirements</div>
+        <div class="dc-desc">Authentication policies, biometric encryption, NDPR compliance, RBAC, audit strategy, backup plan.</div>
+        <span class="dc-tag" style="background:#FCEAEA;color:#791f1f">Security</span>
+      </a>
+      <a class="doc-card" href="acceptance-criteria.html">
+        <div class="dc-num">12</div>
+        <div class="dc-icon" style="background:#EBF5EC;color:#0e5e3b"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8l2 2 4-4"/></svg></div>
+        <div class="dc-title">Acceptance Criteria</div>
+        <div class="dc-desc">Gherkin-format acceptance tests for every major feature. Definition of Done for each module.</div>
+        <span class="dc-tag" style="background:#EBF5EC;color:#0e5e3b">Criteria</span>
+      </a>
+      <a class="doc-card" href="test-plan.html">
+        <div class="dc-num">14</div>
+        <div class="dc-icon" style="background:#E6F0FB;color:#0c447c"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12l4-5 3 3 5-7"/></svg></div>
+        <div class="dc-title">Test Plan</div>
+        <div class="dc-desc">Unit, integration, E2E, UAT, performance, security, and biometric hardware test strategies.</div>
+        <span class="dc-tag" style="background:#E6F0FB;color:#0c447c">Testing</span>
+      </a>
+      <a class="doc-card" href="deployment.html">
+        <div class="dc-num">15</div>
+        <div class="dc-icon" style="background:var(--gold-pale);color:var(--warn)"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="5" width="14" height="9" rx="1.5"/><path d="M5 5V3.5A1.5 1.5 0 016.5 2h3A1.5 1.5 0 0111 3.5V5M8 8v3M6.5 9.5l1.5 1.5 1.5-1.5"/></svg></div>
+        <div class="dc-title">Deployment & Maintenance Plan</div>
+        <div class="dc-desc">Hosting, CI/CD pipeline, monitoring, backup strategy, SLA, and incident response procedures.</div>
+        <span class="dc-tag" style="background:var(--gold-pale);color:var(--warn)">Ops</span>
+      </a>
+    </div>
+  </div>
+
+  <div style="background:var(--navy);border-radius:12px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);margin-bottom:4px">UNIUTY University Portal</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4)">ICT Development Unit · 2024/2025 Academic Session · All documents are confidential</div>
+    </div>
+    <a href="../index.html" style="background:var(--gold);color:var(--navy);padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none">Open Portal →</a>
+  </div>
+</div>
+</body></html>

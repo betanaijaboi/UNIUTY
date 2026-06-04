@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERD — UNIUTY Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="doc-nav">
+    <span class="doc-nav-brand">UNIUTY</span>
+    <span class="doc-nav-sep">›</span>
+    <span class="doc-nav-title">Database Design &amp; ERD</span>
+    <a href="index.html" class="doc-nav-back">← Back to Index</a>
+  </nav>
+
+  <div class="doc-layout">
+    <aside class="doc-aside">
+      <p class="aside-label">On this page</p>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#entity-list">Entity List</a></li>
+        <li><a href="#erd-diagram">ERD Diagram</a></li>
+        <li><a href="#relationships">Relationships</a></li>
+        <li><a href="#indexes">Indexes</a></li>
+      </ul>
+    </aside>
+
+    <main class="doc-main">
+      <h1 class="doc-h1">Database Design &amp; Entity-Relationship Diagram</h1>
+      <p class="doc-lead">PostgreSQL schema design for the UNIUTY Portal, covering 14 core tables with all primary keys, foreign keys, indexes, and relationship cardinalities.</p>
+
+      <div class="callout callout-info">
+        <strong>Database Engine:</strong> PostgreSQL 16 &nbsp;|&nbsp; <strong>ORM:</strong> Prisma / Knex.js &nbsp;|&nbsp; <strong>Naming Convention:</strong> snake_case &nbsp;|&nbsp; <strong>All timestamps:</strong> TIMESTAMPTZ (UTC)
+      </div>
+
+      <!-- OVERVIEW -->
+      <h2 class="doc-h2" id="overview">1. Overview</h2>
+      <p>The database is organized around a central <code>users</code> table from which role-specific profiles (<code>students</code>, <code>staff</code>) extend via one-to-one foreign key relationships. Academic entities (<code>courses</code>, <code>departments</code>) are linked to transactional tables (<code>results</code>, <code>attendance</code>, <code>fees</code>, <code>payments</code>) through normalized join structures. Security and compliance are handled by append-only <code>biometric_log</code> and <code>audit_log</code> tables.</p>
+
+      <!-- ENTITY LIST -->
+      <h2 class="doc-h2" id="entity-list">2. Entity List</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>#</th><th>Table Name</th><th>Purpose</th><th>Key Relationships</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><code>users</code></td><td>Central identity store for all portal users</td><td>Root entity; referenced by students, staff, logs</td></tr>
+            <tr><td>2</td><td><code>roles</code></td><td>Role definitions and permission matrices</td><td>Referenced by users.role</td></tr>
+            <tr><td>3</td><td><code>students</code></td><td>Student-specific profile extending users</td><td>→ users, → departments</td></tr>
+            <tr><td>4</td><td><code>staff</code></td><td>Staff-specific profile extending users</td><td>→ users, → departments</td></tr>
+            <tr><td>5</td><td><code>departments</code></td><td>Academic departments and faculty groupings</td><td>→ staff (HOD); referenced by students, staff, courses</td></tr>
+            <tr><td>6</td><td><code>courses</code></td><td>University course catalogue</td><td>→ departments</td></tr>
+            <tr><td>7</td><td><code>course_assignments</code></td><td>Links lecturers to courses per session/semester</td><td>→ courses, → staff</td></tr>
+            <tr><td>8</td><td><code>results</code></td><td>Student exam and CA results</td><td>→ students, → courses, → staff (submitted_by)</td></tr>
+            <tr><td>9</td><td><code>attendance</code></td><td>Per-session attendance records</td><td>→ students, → courses</td></tr>
+            <tr><td>10</td><td><code>fees</code></td><td>Fee schedules per student per session</td><td>→ students</td></tr>
+            <tr><td>11</td><td><code>payments</code></td><td>Individual payment transactions</td><td>→ fees</td></tr>
+            <tr><td>12</td><td><code>biometric_log</code></td><td>Immutable log of all biometric events</td><td>→ users</td></tr>
+            <tr><td>13</td><td><code>audit_log</code></td><td>Immutable system-wide action audit trail</td><td>→ users</td></tr>
+            <tr><td>14</td><td><code>admissions</code></td><td>Applicant admission records</td><td>→ users (decision_by)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ERD DIAGRAM -->
+      <h2 class="doc-h2" id="erd-diagram">3. ERD Diagram</h2>
+
+      <div class="erd-grid">
+
+        <!-- users -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">users</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> user_id UUID</div>
+          <div class="erd-field">portal_id VARCHAR(20) UNIQUE</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> role VARCHAR → roles.role_name</div>
+          <div class="erd-field">name VARCHAR(150)</div>
+          <div class="erd-field">email VARCHAR(200) UNIQUE</div>
+          <div class="erd-field">password_hash VARCHAR(255)</div>
+          <div class="erd-field">failed_attempts INT DEFAULT 0</div>
+          <div class="erd-field">locked_until TIMESTAMPTZ</div>
+          <div class="erd-field">created_at TIMESTAMPTZ</div>
+        </div>
+
+        <!-- roles -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">roles</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> role_id SERIAL</div>
+          <div class="erd-field">role_name VARCHAR(50) UNIQUE</div>
+          <div class="erd-field">description TEXT</div>
+          <div class="erd-field">permissions_json JSONB</div>
+        </div>
+
+        <!-- students -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">students</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> student_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> user_id → users.user_id</div>
+          <div class="erd-field">matric_number VARCHAR(20) UNIQUE</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> department_id → departments.dept_id</div>
+          <div class="erd-field">level SMALLINT</div>
+          <div class="erd-field">cgpa NUMERIC(4,2)</div>
+          <div class="erd-field">admission_year SMALLINT</div>
+          <div class="erd-field">status VARCHAR(20)</div>
+        </div>
+
+        <!-- staff -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">staff</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> staff_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> user_id → users.user_id</div>
+          <div class="erd-field">staff_number VARCHAR(20) UNIQUE</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> department_id → departments.dept_id</div>
+          <div class="erd-field">title VARCHAR(20)</div>
+          <div class="erd-field">rank VARCHAR(50)</div>
+          <div class="erd-field">specialisation VARCHAR(100)</div>
+        </div>
+
+        <!-- departments -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">departments</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> dept_id UUID</div>
+          <div class="erd-field">code VARCHAR(10) UNIQUE</div>
+          <div class="erd-field">name VARCHAR(100)</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> hod_id → staff.staff_id</div>
+          <div class="erd-field">faculty VARCHAR(100)</div>
+          <div class="erd-field">established_year SMALLINT</div>
+        </div>
+
+        <!-- courses -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">courses</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> course_id UUID</div>
+          <div class="erd-field">code VARCHAR(10) UNIQUE</div>
+          <div class="erd-field">title VARCHAR(150)</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> dept_id → departments.dept_id</div>
+          <div class="erd-field">units SMALLINT</div>
+          <div class="erd-field">level SMALLINT</div>
+          <div class="erd-field">semester SMALLINT</div>
+        </div>
+
+        <!-- course_assignments -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">course_assignments</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> assignment_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> course_id → courses.course_id</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> staff_id → staff.staff_id</div>
+          <div class="erd-field">session VARCHAR(12)</div>
+          <div class="erd-field">semester SMALLINT</div>
+        </div>
+
+        <!-- results -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">results</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> result_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> student_id → students.student_id</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> course_id → courses.course_id</div>
+          <div class="erd-field">ca_score NUMERIC(5,2)</div>
+          <div class="erd-field">exam_score NUMERIC(5,2)</div>
+          <div class="erd-field">total NUMERIC(5,2)</div>
+          <div class="erd-field">grade VARCHAR(2)</div>
+          <div class="erd-field">session VARCHAR(12)</div>
+          <div class="erd-field">semester SMALLINT</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> submitted_by → staff.staff_id</div>
+          <div class="erd-field">bio_verified BOOLEAN</div>
+          <div class="erd-field">submitted_at TIMESTAMPTZ</div>
+        </div>
+
+        <!-- attendance -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">attendance</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> attendance_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> student_id → students.student_id</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> course_id → courses.course_id</div>
+          <div class="erd-field">session_date DATE</div>
+          <div class="erd-field">method VARCHAR(20)</div>
+          <div class="erd-field">location VARCHAR(100)</div>
+          <div class="erd-field">bio_verified BOOLEAN</div>
+          <div class="erd-field">created_at TIMESTAMPTZ</div>
+        </div>
+
+        <!-- fees -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">fees</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> fee_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> student_id → students.student_id</div>
+          <div class="erd-field">session VARCHAR(12)</div>
+          <div class="erd-field">total_amount NUMERIC(12,2)</div>
+          <div class="erd-field">amount_paid NUMERIC(12,2)</div>
+          <div class="erd-field">balance NUMERIC(12,2)</div>
+          <div class="erd-field">status VARCHAR(20)</div>
+          <div class="erd-field">due_date DATE</div>
+        </div>
+
+        <!-- payments -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">payments</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> payment_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> fee_id → fees.fee_id</div>
+          <div class="erd-field">amount NUMERIC(12,2)</div>
+          <div class="erd-field">method VARCHAR(30)</div>
+          <div class="erd-field">reference VARCHAR(100) UNIQUE</div>
+          <div class="erd-field">gateway VARCHAR(30)</div>
+          <div class="erd-field">status VARCHAR(20)</div>
+          <div class="erd-field">paid_at TIMESTAMPTZ</div>
+        </div>
+
+        <!-- biometric_log -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">biometric_log</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> bio_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> user_id → users.user_id</div>
+          <div class="erd-field">method VARCHAR(20)</div>
+          <div class="erd-field">purpose VARCHAR(50)</div>
+          <div class="erd-field">location VARCHAR(100)</div>
+          <div class="erd-field">result VARCHAR(10)</div>
+          <div class="erd-field">quality NUMERIC(5,2)</div>
+          <div class="erd-field">template_hash VARCHAR(64)</div>
+          <div class="erd-field">created_at TIMESTAMPTZ</div>
+        </div>
+
+        <!-- audit_log -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">audit_log</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> log_id UUID</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> user_id → users.user_id</div>
+          <div class="erd-field">action VARCHAR(100)</div>
+          <div class="erd-field">details JSONB</div>
+          <div class="erd-field">ip_address INET</div>
+          <div class="erd-field">bio_verified BOOLEAN</div>
+          <div class="erd-field">created_at TIMESTAMPTZ</div>
+        </div>
+
+        <!-- admissions -->
+        <div class="erd-table">
+          <div class="erd-table-hdr">admissions</div>
+          <div class="erd-field pk"><span class="erd-badge pk-badge">PK</span> application_id UUID</div>
+          <div class="erd-field">applicant_name VARCHAR(150)</div>
+          <div class="erd-field">programme VARCHAR(100)</div>
+          <div class="erd-field">utme_score SMALLINT</div>
+          <div class="erd-field">olevel_credits SMALLINT</div>
+          <div class="erd-field">status VARCHAR(20)</div>
+          <div class="erd-field fk"><span class="erd-badge fk-badge">FK</span> decision_by → users.user_id</div>
+          <div class="erd-field">applied_at TIMESTAMPTZ</div>
+        </div>
+
+      </div>
+
+      <!-- RELATIONSHIPS -->
+      <h2 class="doc-h2" id="relationships">4. Relationships</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>From Table</th><th>FK Column</th><th>To Table</th><th>PK Column</th><th>Cardinality</th><th>On Delete</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>users</td><td>role</td><td>roles</td><td>role_name</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>students</td><td>user_id</td><td>users</td><td>user_id</td><td>One-to-One</td><td>CASCADE</td></tr>
+            <tr><td>students</td><td>department_id</td><td>departments</td><td>dept_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>staff</td><td>user_id</td><td>users</td><td>user_id</td><td>One-to-One</td><td>CASCADE</td></tr>
+            <tr><td>staff</td><td>department_id</td><td>departments</td><td>dept_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>departments</td><td>hod_id</td><td>staff</td><td>staff_id</td><td>Many-to-One (nullable)</td><td>SET NULL</td></tr>
+            <tr><td>courses</td><td>dept_id</td><td>departments</td><td>dept_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>course_assignments</td><td>course_id</td><td>courses</td><td>course_id</td><td>Many-to-One</td><td>CASCADE</td></tr>
+            <tr><td>course_assignments</td><td>staff_id</td><td>staff</td><td>staff_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>results</td><td>student_id</td><td>students</td><td>student_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>results</td><td>course_id</td><td>courses</td><td>course_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>results</td><td>submitted_by</td><td>staff</td><td>staff_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>attendance</td><td>student_id</td><td>students</td><td>student_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>attendance</td><td>course_id</td><td>courses</td><td>course_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>fees</td><td>student_id</td><td>students</td><td>student_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>payments</td><td>fee_id</td><td>fees</td><td>fee_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>biometric_log</td><td>user_id</td><td>users</td><td>user_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>audit_log</td><td>user_id</td><td>users</td><td>user_id</td><td>Many-to-One</td><td>RESTRICT</td></tr>
+            <tr><td>admissions</td><td>decision_by</td><td>users</td><td>user_id</td><td>Many-to-One (nullable)</td><td>SET NULL</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- INDEXES -->
+      <h2 class="doc-h2" id="indexes">5. Indexes</h2>
+      <div class="table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Table</th><th>Index Name</th><th>Columns</th><th>Type</th><th>Rationale</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>users</td><td>idx_users_portal_id</td><td>portal_id</td><td>UNIQUE BTREE</td><td>Login lookup by portal ID</td></tr>
+            <tr><td>users</td><td>idx_users_email</td><td>email</td><td>UNIQUE BTREE</td><td>Email uniqueness and password reset lookup</td></tr>
+            <tr><td>users</td><td>idx_users_role</td><td>role</td><td>BTREE</td><td>Filter users by role efficiently</td></tr>
+            <tr><td>students</td><td>idx_students_matric</td><td>matric_number</td><td>UNIQUE BTREE</td><td>Student lookup by matric number</td></tr>
+            <tr><td>students</td><td>idx_students_dept</td><td>department_id</td><td>BTREE</td><td>Department-level student queries</td></tr>
+            <tr><td>results</td><td>idx_results_student</td><td>student_id</td><td>BTREE</td><td>Student result fetch (primary read path)</td></tr>
+            <tr><td>results</td><td>idx_results_course_session</td><td>course_id, session, semester</td><td>BTREE</td><td>Result batch queries for admin approval</td></tr>
+            <tr><td>attendance</td><td>idx_attend_student_course</td><td>student_id, course_id</td><td>BTREE</td><td>Attendance percentage calculation</td></tr>
+            <tr><td>attendance</td><td>idx_attend_session_date</td><td>session_date</td><td>BTREE</td><td>Daily attendance session queries</td></tr>
+            <tr><td>fees</td><td>idx_fees_student_session</td><td>student_id, session</td><td>BTREE</td><td>Fee balance lookup per student</td></tr>
+            <tr><td>payments</td><td>idx_payments_reference</td><td>reference</td><td>UNIQUE BTREE</td><td>Webhook deduplication by gateway reference</td></tr>
+            <tr><td>payments</td><td>idx_payments_fee</td><td>fee_id</td><td>BTREE</td><td>Payment history per fee record</td></tr>
+            <tr><td>biometric_log</td><td>idx_bio_user_created</td><td>user_id, created_at DESC</td><td>BTREE</td><td>Recent biometric events per user</td></tr>
+            <tr><td>audit_log</td><td>idx_audit_user_created</td><td>user_id, created_at DESC</td><td>BTREE</td><td>Audit trail per user</td></tr>
+            <tr><td>audit_log</td><td>idx_audit_action</td><td>action</td><td>BTREE</td><td>Filter audit log by action type</td></tr>
+            <tr><td>course_assignments</td><td>idx_assign_staff_session</td><td>staff_id, session, semester</td><td>BTREE</td><td>Lecturer "my courses" lookup</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>
