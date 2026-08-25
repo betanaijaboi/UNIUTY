@@ -5,5 +5,7 @@ docs/package.json
 docs/build-srs.js
 .claude/
 *.log
+~$*
 .DS_Store
 Thumbs.db
+.env
