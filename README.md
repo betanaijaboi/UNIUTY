@@ -17,6 +17,9 @@ A professional, role-based university management portal for the **University of 
 | Lecturer | `LEC-0042` | `Lec@2024!` |
 | Student | `UNIUTY/2022/0814` | `Student@1234` |
 
+⚠️ These are shared public demo credentials — don't enter real names or
+real academic data. See [TERMS.md](TERMS.md) and [PRIVACY.md](PRIVACY.md).
+
 ---
 
 ## 📁 Project Structure
