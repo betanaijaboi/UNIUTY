@@ -1,0 +1,13 @@
+# UNIUTY University Portal
+
+> A role-based university management portal for the University of Unity, with biometric authentication.
+
+UNIUTY is a demo/prototype web portal for four roles — Administrator, Vice Chancellor, Lecturer, and Student — covering dashboards, courses, results, transcripts, and faculty management. Login supports simulated biometric authentication (fingerprint, retina, facial recognition) alongside password-based sign-in.
+
+This is a client-side demo app (single HTML page, vanilla JS) backed by a separate Node/Express API. It is not currently deployed publicly.
+
+## Stack
+Vanilla HTML/CSS/JS frontend, Node/Express + MongoDB backend.
+
+## Links
+- Source: https://github.com/betanaijaboi/UNIUTY
